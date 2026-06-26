@@ -1,0 +1,63 @@
+name: caudal
+
+# Dev stack built from per-service Dockerfiles (multi-stage, target: dev).
+# First run:
+#   docker compose up --build
+# - Web: http://localhost:5173
+# - API: http://localhost:8000  (/health, /docs)
+# - DB:  localhost:5432
+#
+# Compose creates a default network where services reach each other by name
+# (the API talks to the DB at host "db" via DATABASE_URL).
+
+services:
+  db:
+    build:
+      context: ./db
+    environment:
+      POSTGRES_USER: caudal
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: caudal
+    ports:
+      - "5432:5432"
+    volumes:
+      - caudal_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U caudal -d caudal"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./apps/api
+      target: dev
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/caudal
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./apps/api:/app        # live source for --reload
+      - /app/.venv             # keep the image's Linux venv (mask host's)
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .                       # repo root (pnpm workspace)
+      dockerfile: apps/web/Dockerfile
+      target: dev
+    environment:
+      VITE_DEV_POLLING: "true"         # reliable HMR on Windows bind mounts
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web:/repo/apps/web      # live source for HMR
+      - /repo/node_modules             # keep container's Linux deps
+      - /repo/apps/web/node_modules    # (esbuild etc. are platform-specific)
+    depends_on:
+      - api
+
+volumes:
+  caudal_pgdata:
