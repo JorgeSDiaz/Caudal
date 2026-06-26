@@ -4,7 +4,7 @@ import { mutate } from 'swr'
 
 import { Button } from '@/components/ui/button'
 import { deleteExpense } from '@/features/expenses/delete-expense'
-import { expensesKey } from '@/features/expenses/keys'
+import { expensesKey, reportKey } from '@/features/expenses/keys'
 import { formatMinorUnits } from '@/features/expenses/money'
 import { useCategories } from '@/features/expenses/use-categories'
 import { type Expense, useExpenses } from '@/features/expenses/use-expenses'
@@ -56,7 +56,7 @@ function ExpenseRow({
   async function handleDelete() {
     try {
       await deleteExpense(expense.id)
-      await mutate(expensesKey(month))
+      await Promise.all([mutate(expensesKey(month)), mutate(reportKey(month))])
       toast.success('Gasto eliminado')
     } catch {
       toast.error('No se pudo eliminar el gasto')

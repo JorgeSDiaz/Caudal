@@ -11,3 +11,7 @@ export function monthOf(isoDate: string): string {
 export function expensesKey(month: string) {
   return ['expenses', month] as const
 }
+
+export function reportKey(month: string) {
+  return ['report', month] as const
+}

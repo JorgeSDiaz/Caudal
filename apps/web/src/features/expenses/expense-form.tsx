@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { createExpense } from '@/features/expenses/create-expense'
-import { expensesKey, monthOf } from '@/features/expenses/keys'
+import { expensesKey, monthOf, reportKey } from '@/features/expenses/keys'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/features/expenses/money'
 import { useCategories } from '@/features/expenses/use-categories'
 
@@ -46,7 +46,8 @@ export function ExpenseForm() {
         occurred_on: occurredOn,
         note: note.trim() === '' ? null : note.trim(),
       })
-      await mutate(expensesKey(monthOf(occurredOn)))
+      const changedMonth = monthOf(occurredOn)
+      await Promise.all([mutate(expensesKey(changedMonth)), mutate(reportKey(changedMonth))])
       toast.success('Gasto registrado')
       // Keep category and date for fast repeated entry; clear amount and note.
       setAmount('')

@@ -1,8 +1,15 @@
+import { Suspense, lazy } from 'react'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Toaster } from '@/components/ui/sonner'
 import { ExpenseForm } from '@/features/expenses/expense-form'
 import { ExpenseList } from '@/features/expenses/expense-list'
 import { currentMonth } from '@/features/expenses/keys'
+
+// Code-split the chart-heavy report (Recharts) out of the initial bundle.
+const ReportView = lazy(() =>
+  import('@/features/reports/report-view').then((module) => ({ default: module.ReportView })),
+)
 
 const monthLabelFormatter = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' })
 
@@ -29,7 +36,19 @@ function App() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="capitalize">{monthLabel(month)}</CardTitle>
+            <CardTitle>En qué se fue el mes</CardTitle>
+            <CardDescription className="capitalize">{monthLabel(month)}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Suspense fallback={<p className="text-muted-foreground text-sm">Cargando…</p>}>
+              <ReportView month={month} />
+            </Suspense>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Movimientos</CardTitle>
             <CardDescription>Tus gastos del mes</CardDescription>
           </CardHeader>
           <CardContent>
