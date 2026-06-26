@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { toast } from 'sonner'
+import { mutate } from 'swr'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { createExpense } from '@/features/expenses/create-expense'
+import { expensesKey, monthOf } from '@/features/expenses/keys'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/features/expenses/money'
 import { useCategories } from '@/features/expenses/use-categories'
 
@@ -44,6 +46,7 @@ export function ExpenseForm() {
         occurred_on: occurredOn,
         note: note.trim() === '' ? null : note.trim(),
       })
+      await mutate(expensesKey(monthOf(occurredOn)))
       toast.success('Gasto registrado')
       // Keep category and date for fast repeated entry; clear amount and note.
       setAmount('')
