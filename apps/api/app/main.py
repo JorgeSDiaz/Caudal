@@ -1,11 +1,19 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.expenses.domain.errors import ExpenseNotFoundError, UnknownCategoryError
+from app.shared.config import get_settings
 from app.shared.domain.errors import DomainValidationError
 
 app = FastAPI(title="Caudal API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_settings().cors_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(api_router, prefix="/api/v1")
 
 
