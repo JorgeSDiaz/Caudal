@@ -10,5 +10,8 @@ dependencies = [
     "alembic",
 ]
 
+[tool.uv]
+package = false
+
 [tool.pyright]
 typeCheckingMode = "strict"

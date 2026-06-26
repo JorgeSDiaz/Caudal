@@ -14,4 +14,5 @@ Monorepo: **FastAPI** (`apps/api`) + **React** (`apps/web`) + **Postgres** (`db`
 - Install (from root): `pnpm install`
 - Web: `pnpm --filter web dev` (http://localhost:5173)
 - DB:  `docker compose -f db/docker-compose.yml up -d`
-- API: `cd apps/api && uv run uvicorn app.main:app --reload`
+- API: `cd apps/api && uv sync && uv run python -m uvicorn app.main:app --reload`
+  (use the `python -m` form; Windows Smart App Control blocks unsigned venv `.exe` shims)
