@@ -45,3 +45,24 @@ class ExpenseResponse(BaseModel):
             occurred_on=expense.occurred_on,
             note=expense.note,
         )
+
+
+class BackupDocument(BaseModel):
+    """Symmetric backup payload: GET /backup returns it, POST /backup accepts it."""
+
+    expenses: list[CreateExpenseRequest]
+
+    @classmethod
+    def from_entities(cls, expenses: list[Expense]) -> BackupDocument:
+        return cls(
+            expenses=[
+                CreateExpenseRequest(
+                    amount_cents=expense.money.amount_cents,
+                    currency=expense.money.currency,
+                    category_id=expense.category_id,
+                    occurred_on=expense.occurred_on,
+                    note=expense.note,
+                )
+                for expense in expenses
+            ]
+        )

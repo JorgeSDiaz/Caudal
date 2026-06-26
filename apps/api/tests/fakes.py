@@ -29,6 +29,14 @@ class InMemoryExpenseRepository:
         self._items[expense.id] = expense
         return expense
 
+    def add_many(self, drafts: list[DraftExpense]) -> int:
+        for draft in drafts:
+            self.add(draft)
+        return len(drafts)
+
+    def list_all(self) -> list[Expense]:
+        return [item for item in self._items.values() if item.id not in self._deleted]
+
     def get(self, expense_id: int) -> Expense | None:
         if expense_id in self._deleted:
             return None
