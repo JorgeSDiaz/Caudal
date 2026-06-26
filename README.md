@@ -11,5 +11,7 @@ Monorepo: **FastAPI** (`apps/api`) + **React** (`apps/web`) + **Postgres** (`db`
 - Front/back contract: OpenAPI -> generated typed TS client
 
 ## Development
+- Install (from root): `pnpm install`
+- Web: `pnpm --filter web dev` (http://localhost:5173)
 - DB:  `docker compose -f db/docker-compose.yml up -d`
 - API: `cd apps/api && uv run uvicorn app.main:app --reload`
