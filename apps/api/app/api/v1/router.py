@@ -1,0 +1,10 @@
+"""Aggregates all v1 routers under a single APIRouter (mounted at /api/v1)."""
+
+from __future__ import annotations
+
+from fastapi import APIRouter
+
+from app.expenses.adapters.inbound.http.router import router as expenses_router
+
+api_router = APIRouter()
+api_router.include_router(expenses_router)
