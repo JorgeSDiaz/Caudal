@@ -1,13 +1,20 @@
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Toaster } from '@/components/ui/sonner'
+import { ExpenseForm } from '@/features/expenses/expense-form'
 
 function App() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-6 p-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">Caudal</h1>
-        <p className="text-muted-foreground">Control de gastos personales</p>
-      </div>
-      <Button>Empezar</Button>
+    <div className="bg-muted/30 flex min-h-svh items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl tracking-tight">Caudal</CardTitle>
+          <CardDescription>Registra un gasto en segundos</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ExpenseForm />
+        </CardContent>
+      </Card>
+      <Toaster />
     </div>
   )
 }
