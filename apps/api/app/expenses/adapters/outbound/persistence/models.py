@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from sqlmodel import Field, SQLModel
+
+
+def utcnow() -> datetime:
+    return datetime.now(UTC)
 
 
 class ExpenseModel(SQLModel, table=True):
@@ -16,6 +20,6 @@ class ExpenseModel(SQLModel, table=True):
     category_id: int = Field(index=True, foreign_key="category.id")
     occurred_on: date = Field(index=True)
     note: str | None = None
-    # created_at / updated_at are managed by the DB (server defaults); we omit them
-    # from the model so inserts don't send NULL into those NOT NULL columns.
+    created_at: datetime = Field(default_factory=utcnow)
+    updated_at: datetime = Field(default_factory=utcnow)
     deleted_at: datetime | None = None

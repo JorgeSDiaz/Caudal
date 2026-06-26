@@ -6,8 +6,9 @@ from datetime import date
 
 from sqlmodel import Session, select
 
-from app.expenses.adapters.outbound.persistence.models import ExpenseModel
+from app.expenses.adapters.outbound.persistence.models import ExpenseModel, utcnow
 from app.expenses.domain.entities import DraftExpense, Expense
+from app.expenses.domain.errors import ExpenseNotFoundError
 from app.shared.domain.money import Money
 
 
@@ -29,6 +30,36 @@ class SqlExpenseRepository:
         self._session.commit()
         self._session.refresh(model)
         return _to_entity(model)
+
+    def get(self, expense_id: int) -> Expense | None:
+        model = self._session.get(ExpenseModel, expense_id)
+        if model is None or model.deleted_at is not None:
+            return None
+        return _to_entity(model)
+
+    def update(self, expense: Expense) -> Expense:
+        model = self._session.get(ExpenseModel, expense.id)
+        if model is None or model.deleted_at is not None:
+            raise ExpenseNotFoundError(expense.id)
+        model.amount_cents = expense.money.amount_cents
+        model.currency = expense.money.currency
+        model.category_id = expense.category_id
+        model.occurred_on = expense.occurred_on
+        model.note = expense.note
+        model.updated_at = utcnow()
+        self._session.add(model)
+        self._session.commit()
+        self._session.refresh(model)
+        return _to_entity(model)
+
+    def soft_delete(self, expense_id: int) -> bool:
+        model = self._session.get(ExpenseModel, expense_id)
+        if model is None or model.deleted_at is not None:
+            return False
+        model.deleted_at = utcnow()
+        self._session.add(model)
+        self._session.commit()
+        return True
 
     def list_for_month(self, year: int, month: int) -> list[Expense]:
         start = date(year, month, 1)

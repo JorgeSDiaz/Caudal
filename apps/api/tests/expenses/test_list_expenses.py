@@ -7,11 +7,11 @@ from app.expenses.application.list_expenses import (
     ListExpensesForMonth,
     ListExpensesForMonthQuery,
 )
-from tests.fakes import InMemoryExpenseRepository
+from tests.fakes import InMemoryCategoryChecker, InMemoryExpenseRepository
 
 
 def _record(repository: InMemoryExpenseRepository, occurred_on: date) -> None:
-    CreateExpense(repository)(
+    CreateExpense(repository, InMemoryCategoryChecker({1}))(
         CreateExpenseCommand(
             amount_cents=1000,
             currency="COP",

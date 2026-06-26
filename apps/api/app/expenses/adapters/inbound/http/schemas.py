@@ -17,6 +17,16 @@ class CreateExpenseRequest(BaseModel):
     note: str | None = None
 
 
+class UpdateExpenseRequest(BaseModel):
+    """All fields optional; only the ones provided by the client are changed."""
+
+    amount_cents: int | None = Field(default=None, gt=0)
+    currency: str | None = Field(default=None, min_length=3, max_length=3)
+    category_id: int | None = Field(default=None, gt=0)
+    occurred_on: date | None = None
+    note: str | None = None
+
+
 class ExpenseResponse(BaseModel):
     id: int
     amount_cents: int

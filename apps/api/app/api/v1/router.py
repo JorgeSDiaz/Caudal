@@ -6,7 +6,9 @@ from fastapi import APIRouter
 
 from app.categories.adapters.inbound.http.router import router as categories_router
 from app.expenses.adapters.inbound.http.router import router as expenses_router
+from app.reports.adapters.inbound.http.router import router as reports_router
 
 api_router = APIRouter()
 api_router.include_router(expenses_router)
 api_router.include_router(categories_router)
+api_router.include_router(reports_router)

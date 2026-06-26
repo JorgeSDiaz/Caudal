@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from app.expenses.domain.entities import Expense
 from app.expenses.ports.repository import ExpenseRepository
+from app.shared.domain.errors import DomainValidationError
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,5 +21,5 @@ class ListExpensesForMonth:
 
     def __call__(self, query: ListExpensesForMonthQuery) -> list[Expense]:
         if not 1 <= query.month <= 12:
-            raise ValueError("month must be between 1 and 12")
+            raise DomainValidationError("month must be between 1 and 12")
         return self._repository.list_for_month(query.year, query.month)

@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from datetime import date
 
 from app.expenses.domain.entities import DraftExpense, Expense
+from app.expenses.domain.errors import UnknownCategoryError
+from app.expenses.ports.category_checker import CategoryChecker
 from app.expenses.ports.repository import ExpenseRepository
 from app.shared.domain.money import Money
 
@@ -20,10 +22,13 @@ class CreateExpenseCommand:
 
 
 class CreateExpense:
-    def __init__(self, repository: ExpenseRepository) -> None:
+    def __init__(self, repository: ExpenseRepository, categories: CategoryChecker) -> None:
         self._repository = repository
+        self._categories = categories
 
     def __call__(self, command: CreateExpenseCommand) -> Expense:
+        if not self._categories.exists(command.category_id):
+            raise UnknownCategoryError(command.category_id)
         draft = DraftExpense(
             money=Money(command.amount_cents, command.currency),
             category_id=command.category_id,

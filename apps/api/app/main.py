@@ -1,9 +1,27 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
+from app.expenses.domain.errors import ExpenseNotFoundError, UnknownCategoryError
+from app.shared.domain.errors import DomainValidationError
 
 app = FastAPI(title="Caudal API")
 app.include_router(api_router, prefix="/api/v1")
+
+
+@app.exception_handler(ExpenseNotFoundError)
+def _handle_expense_not_found(_: Request, exc: ExpenseNotFoundError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(UnknownCategoryError)
+def _handle_unknown_category(_: Request, exc: UnknownCategoryError) -> JSONResponse:
+    return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+
+@app.exception_handler(DomainValidationError)
+def _handle_domain_validation(_: Request, exc: DomainValidationError) -> JSONResponse:
+    return JSONResponse(status_code=422, content={"detail": str(exc)})
 
 
 @app.get("/health")
