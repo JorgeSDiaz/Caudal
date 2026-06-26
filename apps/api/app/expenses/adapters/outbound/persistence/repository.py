@@ -94,7 +94,8 @@ class SqlExpenseRepository:
                 ExpenseModel.occurred_on >= start,
                 ExpenseModel.occurred_on < end,
             )
-            .order_by(ExpenseModel.occurred_on)  # type: ignore[arg-type]
+            # Most recent first (and stable for same-day entries by id).
+            .order_by(ExpenseModel.occurred_on.desc(), ExpenseModel.id.desc())  # type: ignore[union-attr]
         )
         return [_to_entity(row) for row in self._session.exec(statement).all()]
 
