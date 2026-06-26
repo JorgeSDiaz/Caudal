@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from itertools import count
 
+from app.categories.domain.entities import Category
 from app.expenses.domain.entities import DraftExpense, Expense
 
 
@@ -31,3 +32,13 @@ class InMemoryExpenseRepository:
             for item in self._items
             if item.occurred_on.year == year and item.occurred_on.month == month
         ]
+
+
+class InMemoryCategoryRepository:
+    """Satisfies the CategoryRepository port structurally (typing.Protocol)."""
+
+    def __init__(self, categories: list[Category]) -> None:
+        self._categories = list(categories)
+
+    def list_all(self) -> list[Category]:
+        return list(self._categories)

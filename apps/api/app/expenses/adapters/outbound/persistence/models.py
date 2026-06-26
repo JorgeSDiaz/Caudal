@@ -13,7 +13,7 @@ class ExpenseModel(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     amount_cents: int
     currency: str = Field(default="COP")
-    category_id: int = Field(index=True)
+    category_id: int = Field(index=True, foreign_key="category.id")
     occurred_on: date = Field(index=True)
     note: str | None = None
     # created_at / updated_at are managed by the DB (server defaults); we omit them

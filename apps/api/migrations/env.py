@@ -9,7 +9,8 @@ from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
 # Import models so they register on SQLModel.metadata (needed for autogenerate).
-from app.expenses.adapters.outbound.persistence import models  # noqa: F401
+from app.categories.adapters.outbound.persistence import models as _category_models  # noqa: F401
+from app.expenses.adapters.outbound.persistence import models as _expense_models  # noqa: F401
 from app.shared.config import get_settings
 
 config = context.config
