@@ -1,7 +1,7 @@
 import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 
-import { formatMinorUnits } from '@/features/expenses/money'
-import { useMonthlyReport } from '@/features/reports/use-monthly-report'
+import { useMonthlyReport } from '@/features/reports/hooks/use-monthly-report'
+import { formatMinorUnits } from '@/shared/money'
 
 const CHART_COLORS = [
   'var(--color-chart-1)',
@@ -28,14 +28,14 @@ export function CategoryBreakdown({ month }: { month: string }) {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="h-52 w-52 shrink-0">
+      <div className="relative aspect-square w-full max-w-[17rem]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={slices}
               dataKey="total_cents"
               nameKey="category_name"
-              innerRadius="62%"
+              innerRadius="64%"
               outerRadius="100%"
               paddingAngle={2}
               stroke="none"
@@ -47,6 +47,14 @@ export function CategoryBreakdown({ month }: { month: string }) {
             </Pie>
           </PieChart>
         </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-muted-foreground text-[0.7rem] font-medium tracking-wide uppercase">
+            Total
+          </span>
+          <span className="text-xl font-semibold tracking-tight tabular-nums">
+            {formatMinorUnits(report.total_cents)}
+          </span>
+        </div>
       </div>
 
       <ul className="w-full space-y-2.5">

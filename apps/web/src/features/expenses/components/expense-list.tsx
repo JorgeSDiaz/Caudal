@@ -1,13 +1,24 @@
-import { Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { mutate } from 'swr'
 
 import { Button } from '@/components/ui/button'
-import { deleteExpense } from '@/features/expenses/delete-expense'
-import { expensesKey, reportKey } from '@/features/expenses/keys'
-import { formatMinorUnits } from '@/features/expenses/money'
-import { useCategories } from '@/features/expenses/use-categories'
-import { type Expense, useExpenses } from '@/features/expenses/use-expenses'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { useCategories } from '@/features/categories/hooks/use-categories'
+import { deleteExpense } from '@/features/expenses/api/delete-expense'
+import { ExpenseForm } from '@/features/expenses/components/expense-form'
+import type { Expense } from '@/features/expenses/expense'
+import { useExpenses } from '@/features/expenses/hooks/use-expenses'
+import { formatMinorUnits } from '@/shared/money'
+import { expensesKey, reportKey } from '@/shared/swr-keys'
 
 const dayFormatter = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short' })
 
@@ -27,7 +38,6 @@ export function ExpenseList({ month }: { month: string }) {
     return <p className="text-muted-foreground text-sm">Aún no hay gastos este mes.</p>
   }
 
-  // Derived during render: id -> category name lookup.
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
 
   return (
@@ -53,6 +63,8 @@ function ExpenseRow({
   categoryName: string
   month: string
 }) {
+  const [isEditing, setIsEditing] = useState(false)
+
   async function handleDelete() {
     try {
       await deleteExpense(expense.id)
@@ -74,6 +86,20 @@ function ExpenseRow({
       </div>
       <div className="flex items-center gap-1">
         <span className="font-semibold tabular-nums">{formatMinorUnits(expense.amount_cents)}</span>
+        <Dialog open={isEditing} onOpenChange={setIsEditing}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label={`Editar gasto de ${categoryName}`}>
+              <Pencil className="text-muted-foreground" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar gasto</DialogTitle>
+              <DialogDescription>Ajusta monto, categoría, fecha o nota.</DialogDescription>
+            </DialogHeader>
+            <ExpenseForm expense={expense} onSaved={() => setIsEditing(false)} />
+          </DialogContent>
+        </Dialog>
         <Button
           variant="ghost"
           size="icon"
