@@ -1,77 +1,109 @@
-# Caudal — guía de arquitectura y estilo
+# CLAUDE.md
 
-App de control de gastos. Monorepo: **FastAPI** (`apps/api`) + **React** (`apps/web`) + **Postgres** (`db`).
-El contrato front/back es **OpenAPI → cliente TS tipado** (`apps/web/src/api/schema.d.ts`, regenerado desde el backend).
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Estas reglas son la referencia. Antes de extender, el código nuevo debe encajar en ellas.
+## What this is
 
-## Principios transversales
+Personal expense-tracking app (Caudal). Monorepo: **FastAPI** (`apps/api`) + **React** (`apps/web`) + **Postgres** (`db`). The front/back contract is **OpenAPI → generated typed TS client** (`apps/web/src/api/schema.d.ts`).
 
-- **Interfaces antes que implementaciones.** El consumidor define el contrato que necesita; la
-  implementación concreta lo satisface y se conecta en un único punto de composición.
-- **Componentes desacoplados.** Un módulo/feature no importa los detalles internos de otro.
-  El acoplamiento entre contextos pasa siempre por un contrato, no por el adapter concreto.
-- **Complejidad mínima.** Una responsabilidad por unidad (caso de uso, hook, componente, request).
-  Funciones cortas, sin anidamiento profundo, sin estado derivado vía efectos cuando se puede derivar en render.
-- **Comentarios solo de _por qué_, nunca de _qué_.** El nombre dice qué hace; el comentario explica
-  una decisión no obvia (por qué atómico, por qué este orden, por qué este workaround). Si un comentario
-  parafrasea el código, sobra: renombra en vez de comentar. Los docstrings de módulo/caso de uso valen
-  cuando aportan el _porqué_, no cuando repiten el nombre del archivo.
+---
 
-## Backend (`apps/api`) — Hexagonal + Screaming
+## Commands
 
-La estructura grita el dominio, no el framework. Cada **bounded context** es una carpeta de primer
-nivel bajo `app/` (`expenses`, `categories`, `reports`) y repite el mismo patrón interno:
+### Full stack (Docker — recommended first run)
+```bash
+docker compose up --build   # first time
+docker compose up           # afterwards
+```
+Services: web → http://localhost:5173 · api → http://localhost:8000 · db → localhost:5432
+
+### API (`apps/api`) — uses `uv`
+```bash
+cd apps/api
+uv run pytest -q                          # all tests
+uv run pytest tests/expenses/test_create_expense.py  # single file
+uv run pytest -k "test_create"            # by name pattern
+uv run ruff check app                     # lint
+uv run ruff format app                    # format
+uv run python -m uvicorn app.main:app --reload  # dev server (use -m form on Windows)
+```
+> The API needs `DATABASE_URL` set. For local dev without Docker: `docker compose up -d db` then set `DATABASE_URL=postgresql+psycopg://...` in `apps/api/.env`.
+
+### Web (`apps/web`) — uses `pnpm`
+```bash
+pnpm --filter web dev                     # dev server
+pnpm --filter web exec tsc -p tsconfig.app.json --noEmit  # typecheck
+pnpm --filter web exec eslint src         # lint
+pnpm --filter web build                   # production build (catches lazy-import paths)
+pnpm --filter web run generate:api        # regenerate schema.d.ts (API must be running)
+```
+
+### Adding a web dependency
+Install inside the running container or rebuild the image — the container has a Linux-specific `node_modules` volume that masks the host's. See memory note on this.
+
+---
+
+## Architecture
+
+### Backend — Hexagonal + Screaming
+
+Structure screams the domain, not the framework. Each **bounded context** is a top-level folder under `app/` and repeats the same internal pattern:
 
 ```
 <context>/
-  domain/        # entidades y value objects puros (sin framework ni persistencia)
-  ports/         # contratos como typing.Protocol (interfaces, sin implementación)
-  application/   # un caso de uso por archivo; clase con __call__ y un Command/Query frozen
+  domain/              # pure Python entities and value objects — no framework, no persistence
+  ports/               # typing.Protocol contracts owned by this context
+  application/         # one use case per file; class with __call__ + frozen Command/Query dataclass
   adapters/
-    inbound/http/        # routers + schemas Pydantic (mapean request <-> caso de uso)
-    outbound/persistence/ # repos SQLModel que satisfacen los ports (structural typing)
-  wiring.py      # composition root: construye casos de uso y expone Annotated deps
+    inbound/http/      # FastAPI router + Pydantic schemas (request ↔ use case mapping)
+    outbound/          # concrete adapters satisfying ports (SQLModel repos, cross-context adapters)
+  wiring.py            # composition root: builds use cases from adapters, exposes Annotated FastAPI deps
 ```
 
-Reglas:
-- **Ports = `typing.Protocol`.** Los adapters los satisfacen estructuralmente, sin herencia.
-- **Domain puro.** Nada de FastAPI/SQLModel en `domain/`. Validación de invariantes en `__post_init__`.
-- **Desacople entre contextos:** un contexto que necesita algo de otro define su propio port acotado
-  (ej. `expenses/ports/category_checker.py` con solo `exists`) y un adapter lo une en `wiring.py`.
-  `expenses` no importa el módulo `categories` directamente.
-- **Casos de uso** reciben sus dependencias por constructor (los ports), nunca instancian adapters.
-- Pyright en modo estricto; Pydantic solo en la frontera HTTP.
+Key rules:
+- **Ports are `typing.Protocol`** — adapters satisfy them structurally, no inheritance.
+- **Domain is pure** — no FastAPI or SQLModel inside `domain/`. Invariants go in `__post_init__`.
+- **Cross-context coupling goes through a port** — `expenses` needs categories but defines its own `CategoryChecker` port (`exists(id)` only) and wires it in `wiring.py`. It never imports from `categories/adapters/` directly.
+- **Use cases take ports in their constructor** and never instantiate adapters themselves.
+- **Error mapping** lives in `app/main.py` (domain error → HTTP status). Don't add HTTP concerns to domain or application layers.
+- Pyright strict mode. Pydantic only at the HTTP boundary.
 
-## Frontend (`apps/web`) — Screaming feature-sliced
+### Frontend — Screaming feature-sliced
 
-Sigue el _espíritu_ del backend (gritar el dominio, contratos antes que detalles) sin forzar
-ports/adapters: en React eso suele ser ceremonia vacía. Cada **feature** vive en `src/features/<feature>/`
-con esta estructura replicable:
+Mirrors the backend's spirit (domain first, contracts before details) without forcing ports/adapters, which would be empty ceremony in React. Each **feature** lives in `src/features/<feature>/`:
 
 ```
 features/<feature>/
-  <feature>.ts     # EL OBJETO: tipos del dominio derivados del schema OpenAPI (fuente única)
-  api/             # requests al backend (un archivo por operación: create/update/list/...)
-  hooks/           # hooks de datos (SWR) que envuelven los requests
-  components/       # UI de la feature
+  <feature>.ts     # THE OBJECT: domain types re-exported from the OpenAPI schema — single source of truth
+  api/             # one file per backend operation (create, update, delete, list…)
+  hooks/           # SWR hooks that wrap the api/ functions — own the cache key and revalidation
+  components/      # UI components for this feature
 ```
 
-Ejemplos: `features/expenses/expense.ts`, `features/categories/category.ts`, `features/reports/report.ts`.
+Shared helpers (used by more than one feature) live in `src/shared/`: `money.ts`, `dates.ts`, `swr-keys.ts`.
 
-Reglas:
-- **El tipo del objeto se define una sola vez** en `<feature>.ts` (re-exporta del schema OpenAPI).
-  Nadie más redeclara `Expense`/`Category`/`MonthlyReport`; todos importan desde ahí.
-- **`api/`** = adapters de salida hacia el backend. Cada función hace un request y mapea errores.
-- **`hooks/`** orquestan caché/revalidación (SWR) sobre los requests; no contienen el `fetch` inline.
-- **`components/`** consumen hooks y tipos de la feature; no llaman a `api/` directamente para datos
-  de lectura (van por el hook), pero sí para mutaciones puntuales (create/update/delete).
-- **Código compartido entre features** vive en `src/shared/` (`money.ts`, `dates.ts`, `swr-keys.ts`),
-  no dentro de una feature. Si dos features importan algo de una tercera, ese algo es `shared/`.
-- `src/components/ui/` es shadcn (no tocar a mano salvo regenerar); `src/lib/utils.ts` es util de shadcn.
+Key rules:
+- **Each type is declared once** in `<feature>.ts`. Nobody redeclares `Expense`, `Category`, or `MonthlyReport` — they all import from there.
+- **`components/`** call `api/` directly for mutations (create/update/delete), but always go through a hook for reads.
+- **`src/components/ui/`** is shadcn — regenerate with the CLI, don't hand-edit. `src/lib/utils.ts` is shadcn's `cn` utility.
+- State derived from existing data is computed during render, not via `useEffect`.
 
-## Verificación antes de dar por hecho un cambio
+### OpenAPI contract
 
-- Web: `pnpm --filter web exec tsc -p tsconfig.app.json --noEmit` y `pnpm --filter web exec eslint src`.
-- API: `cd apps/api && uv run pytest -q` (y pyright estricto si está disponible en el entorno).
-- Al cambiar el contrato del backend, **regenerar** `apps/web/src/api/schema.d.ts`.
+When backend routes or schemas change, regenerate the TS client with the API running:
+```bash
+pnpm --filter web run generate:api
+```
+This rewrites `apps/web/src/api/schema.d.ts`. All frontend types for API objects derive from it.
+
+### Database migrations
+
+Alembic. Migration files live in `apps/api/migrations/versions/`. The DDL source of truth is the migration, not the SQLModel models.
+
+---
+
+## Code style
+
+- **Comments explain _why_, never _what_**. If a comment paraphrases the code, rename instead. Module-level docstrings that only restate the file name are noise — remove them.
+- One responsibility per unit: one use case per file, one request per `api/` file, one hook per concern.
+- No effects for derived state — compute during render.
