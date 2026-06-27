@@ -11,16 +11,7 @@ const CHART_COLORS = [
   'var(--color-chart-5)',
 ]
 
-function changeVsPreviousMonth(total: number, previous: number): string | null {
-  if (previous === 0) return null
-  const percent = Math.round(((total - previous) / previous) * 100)
-  if (percent === 0) return 'Igual que el mes anterior'
-  return percent > 0
-    ? `▲ ${percent}% vs. mes anterior`
-    : `▼ ${Math.abs(percent)}% vs. mes anterior`
-}
-
-export function ReportView({ month }: { month: string }) {
+export function CategoryBreakdown({ month }: { month: string }) {
   const { report, isLoading } = useMonthlyReport(month)
 
   if (isLoading || !report) {
@@ -30,22 +21,14 @@ export function ReportView({ month }: { month: string }) {
     return <p className="text-muted-foreground text-sm">Sin gastos este mes.</p>
   }
 
-  const change = changeVsPreviousMonth(report.total_cents, report.previous_month_total_cents)
   const slices = report.by_category.map((item, index) => ({
     ...item,
     color: CHART_COLORS[index % CHART_COLORS.length],
   }))
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <p className="text-3xl font-semibold tracking-tight">
-          {formatMinorUnits(report.total_cents)}
-        </p>
-        {change && <p className="text-muted-foreground text-sm">{change}</p>}
-      </div>
-
-      <div className="h-44">
+    <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
+      <div className="h-44 w-44 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -56,6 +39,7 @@ export function ReportView({ month }: { month: string }) {
               outerRadius="100%"
               paddingAngle={2}
               stroke="none"
+              isAnimationActive={false}
             >
               {slices.map((slice) => (
                 <Cell key={slice.category_id} fill={slice.color} />
@@ -65,7 +49,7 @@ export function ReportView({ month }: { month: string }) {
         </ResponsiveContainer>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="w-full flex-1 space-y-2.5">
         {slices.map((slice) => (
           <li key={slice.category_id} className="flex items-center justify-between gap-3 text-sm">
             <span className="flex min-w-0 items-center gap-2">
