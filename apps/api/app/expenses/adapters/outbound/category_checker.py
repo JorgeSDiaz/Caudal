@@ -1,5 +1,3 @@
-"""Adapter implementing the expenses CategoryChecker port via the categories module."""
-
 from __future__ import annotations
 
 from app.categories.ports.repository import CategoryRepository
@@ -12,4 +10,4 @@ class CategoryRepositoryChecker:
         self._categories = categories
 
     def exists(self, category_id: int) -> bool:
-        return any(category.id == category_id for category in self._categories.list_all())
+        return self._categories.exists(category_id)

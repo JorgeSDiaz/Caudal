@@ -73,6 +73,9 @@ class InMemoryCategoryRepository:
     def list_all(self) -> list[Category]:
         return list(self._categories)
 
+    def exists(self, category_id: int) -> bool:
+        return any(category.id == category_id for category in self._categories)
+
 
 class InMemoryCategoryChecker:
     """Satisfies the CategoryChecker port; knows a fixed set of existing ids."""

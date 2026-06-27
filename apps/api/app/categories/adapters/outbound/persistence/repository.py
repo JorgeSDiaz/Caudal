@@ -1,5 +1,3 @@
-"""Postgres adapter implementing the CategoryRepository port (maps model <-> entity)."""
-
 from __future__ import annotations
 
 from sqlmodel import Session, select
@@ -17,6 +15,10 @@ class SqlCategoryRepository:
     def list_all(self) -> list[Category]:
         rows = self._session.exec(select(CategoryModel)).all()
         return [_to_entity(row) for row in rows]
+
+    def exists(self, category_id: int) -> bool:
+        statement = select(CategoryModel.id).where(CategoryModel.id == category_id)
+        return self._session.exec(statement).first() is not None
 
 
 def _to_entity(model: CategoryModel) -> Category:
