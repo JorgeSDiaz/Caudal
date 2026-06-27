@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { ExpenseForm } from '@/features/expenses/expense-form'
 import { ExpenseList } from '@/features/expenses/expense-list'
 import { currentMonth } from '@/features/expenses/keys'
-import { MonthTotal } from '@/features/reports/month-total'
+import { MonthSummary } from '@/features/reports/month-summary'
 
 // Code-split the chart-heavy breakdown (Recharts) out of the initial bundle.
 const CategoryBreakdown = lazy(() =>
@@ -25,9 +25,9 @@ function App() {
   const month = currentMonth()
 
   return (
-    <div className="bg-muted/40 min-h-svh">
-      <header className="bg-background sticky top-0 z-10 border-b">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <div className="bg-muted/40 flex min-h-svh flex-col">
+      <header className="bg-background border-b">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-baseline gap-2.5">
             <span className="text-xl font-semibold tracking-tight">Caudal</span>
             <span className="text-muted-foreground hidden text-sm sm:inline">Control de gastos</span>
@@ -38,23 +38,21 @@ function App() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-7xl grid-cols-1 items-start gap-8 px-6 py-8 lg:grid-cols-[22rem_1fr]">
-        <aside className="lg:sticky lg:top-24">
-          <Card>
-            <CardHeader>
-              <CardTitle>Registrar gasto</CardTitle>
-              <CardDescription>En segundos</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ExpenseForm />
-            </CardContent>
-          </Card>
-        </aside>
+      <main className="flex flex-1 items-center">
+        <div className="mx-auto w-full max-w-6xl space-y-6 px-6 py-8">
+          <MonthSummary month={month} />
 
-        <div className="space-y-8">
-          <MonthTotal month={month} />
+          <div className="grid items-stretch gap-6 lg:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle>Registrar gasto</CardTitle>
+                <CardDescription>En segundos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ExpenseForm />
+              </CardContent>
+            </Card>
 
-          <div className="grid gap-6 xl:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>En qué se fue</CardTitle>

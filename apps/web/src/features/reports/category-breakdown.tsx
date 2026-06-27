@@ -27,8 +27,8 @@ export function CategoryBreakdown({ month }: { month: string }) {
   }))
 
   return (
-    <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-      <div className="h-44 w-44 shrink-0">
+    <div className="flex flex-col items-center gap-6">
+      <div className="h-52 w-52 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -49,7 +49,7 @@ export function CategoryBreakdown({ month }: { month: string }) {
         </ResponsiveContainer>
       </div>
 
-      <ul className="w-full flex-1 space-y-2.5">
+      <ul className="w-full space-y-2.5">
         {slices.map((slice) => (
           <li key={slice.category_id} className="flex items-center justify-between gap-3 text-sm">
             <span className="flex min-w-0 items-center gap-2">
