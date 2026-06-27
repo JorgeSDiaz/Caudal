@@ -1,5 +1,3 @@
-"""Use case: list the expenses recorded in a given month."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

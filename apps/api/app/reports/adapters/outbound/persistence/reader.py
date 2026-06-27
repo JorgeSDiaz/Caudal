@@ -1,5 +1,3 @@
-"""Postgres adapter implementing the MonthlyExpenseReader port (SQL aggregation)."""
-
 from __future__ import annotations
 
 from datetime import date

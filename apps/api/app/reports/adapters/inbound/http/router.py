@@ -1,5 +1,3 @@
-"""Inbound HTTP adapter for the monthly report."""
-
 from __future__ import annotations
 
 from typing import Annotated

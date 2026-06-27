@@ -1,5 +1,3 @@
-"""Inbound HTTP adapter for categories."""
-
 from __future__ import annotations
 
 from fastapi import APIRouter

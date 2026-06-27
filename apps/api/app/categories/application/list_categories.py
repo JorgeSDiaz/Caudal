@@ -1,5 +1,3 @@
-"""Use case: list the active categories a user can pick, in display order."""
-
 from __future__ import annotations
 
 from app.categories.domain.entities import Category

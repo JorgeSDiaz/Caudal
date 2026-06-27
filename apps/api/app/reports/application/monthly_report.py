@@ -1,5 +1,3 @@
-"""Use case: build the "where did the month go?" report."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

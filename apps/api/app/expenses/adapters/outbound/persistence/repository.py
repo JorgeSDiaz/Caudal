@@ -1,5 +1,3 @@
-"""Postgres adapter implementing the ExpenseRepository port (maps model <-> entity)."""
-
 from __future__ import annotations
 
 from datetime import date

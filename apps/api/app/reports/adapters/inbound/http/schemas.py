@@ -1,5 +1,3 @@
-"""HTTP DTOs for the monthly report endpoint."""
-
 from __future__ import annotations
 
 from pydantic import BaseModel

@@ -1,5 +1,3 @@
-"""Use case: export every (non-deleted) expense for backup."""
-
 from __future__ import annotations
 
 from app.expenses.domain.entities import Expense

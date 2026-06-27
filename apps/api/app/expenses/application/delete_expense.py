@@ -1,5 +1,3 @@
-"""Use case: soft-delete an expense."""
-
 from __future__ import annotations
 
 from app.expenses.domain.errors import ExpenseNotFoundError

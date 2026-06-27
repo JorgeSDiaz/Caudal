@@ -1,5 +1,3 @@
-"""Use case: import expenses from a backup, atomically."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

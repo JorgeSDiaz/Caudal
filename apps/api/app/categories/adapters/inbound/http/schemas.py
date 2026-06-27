@@ -1,5 +1,3 @@
-"""HTTP DTOs for the categories endpoints."""
-
 from __future__ import annotations
 
 from pydantic import BaseModel

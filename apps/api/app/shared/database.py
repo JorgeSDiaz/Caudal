@@ -1,5 +1,3 @@
-"""Database engine and session management (outbound infrastructure)."""
-
 from __future__ import annotations
 
 from collections.abc import Iterator
