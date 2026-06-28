@@ -7,6 +7,8 @@ from itertools import count
 from app.categories.domain.entities import Category, CategoryKind
 from app.expenses.domain.entities import DraftExpense, Expense
 from app.expenses.domain.errors import ExpenseNotFoundError
+from app.incomes.domain.entities import DraftIncome, Income
+from app.incomes.domain.errors import IncomeNotFoundError
 from app.reports.domain.entities import CategoryBreakdown
 
 
@@ -87,6 +89,70 @@ class InMemoryCategoryChecker:
 
     def exists(self, category_id: int) -> bool:
         return category_id in self._existing_ids
+
+
+class InMemoryIncomeRepository:
+    """Satisfies the IncomeRepository port structurally (typing.Protocol)."""
+
+    def __init__(self) -> None:
+        self._items: dict[int, Income] = {}
+        self._deleted: set[int] = set()
+        self._ids = count(1)
+
+    def add(self, draft: DraftIncome) -> Income:
+        income = Income(
+            id=next(self._ids),
+            money=draft.money,
+            source_id=draft.source_id,
+            occurred_on=draft.occurred_on,
+            note=draft.note,
+        )
+        self._items[income.id] = income
+        return income
+
+    def add_many(self, drafts: list[DraftIncome]) -> int:
+        for draft in drafts:
+            self.add(draft)
+        return len(drafts)
+
+    def list_all(self) -> list[Income]:
+        return [item for item in self._items.values() if item.id not in self._deleted]
+
+    def get(self, income_id: int) -> Income | None:
+        if income_id in self._deleted:
+            return None
+        return self._items.get(income_id)
+
+    def update(self, income: Income) -> Income:
+        if income.id not in self._items or income.id in self._deleted:
+            raise IncomeNotFoundError(income.id)
+        self._items[income.id] = income
+        return income
+
+    def soft_delete(self, income_id: int) -> bool:
+        if income_id not in self._items or income_id in self._deleted:
+            return False
+        self._deleted.add(income_id)
+        return True
+
+    def list_for_month(self, year: int, month: int) -> list[Income]:
+        return [
+            item
+            for item in self._items.values()
+            if item.id not in self._deleted
+            and item.occurred_on.year == year
+            and item.occurred_on.month == month
+        ]
+
+
+class InMemorySourceChecker:
+    """Satisfies the SourceChecker port; knows a fixed set of existing ids."""
+
+    def __init__(self, existing_ids: set[int]) -> None:
+        self._existing_ids = existing_ids
+
+    def exists(self, source_id: int) -> bool:
+        return source_id in self._existing_ids
 
 
 class StubMonthlyExpenseReader:

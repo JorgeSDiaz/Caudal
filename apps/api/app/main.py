@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.expenses.domain.errors import ExpenseNotFoundError, UnknownCategoryError
+from app.incomes.domain.errors import IncomeNotFoundError, UnknownSourceError
 from app.shared.config import get_settings
 from app.shared.domain.errors import DomainValidationError
 
@@ -24,6 +25,16 @@ def _handle_expense_not_found(_: Request, exc: ExpenseNotFoundError) -> JSONResp
 
 @app.exception_handler(UnknownCategoryError)
 def _handle_unknown_category(_: Request, exc: UnknownCategoryError) -> JSONResponse:
+    return JSONResponse(status_code=422, content={"detail": str(exc)})
+
+
+@app.exception_handler(IncomeNotFoundError)
+def _handle_income_not_found(_: Request, exc: IncomeNotFoundError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
+
+@app.exception_handler(UnknownSourceError)
+def _handle_unknown_source(_: Request, exc: UnknownSourceError) -> JSONResponse:
     return JSONResponse(status_code=422, content={"detail": str(exc)})
 
 
