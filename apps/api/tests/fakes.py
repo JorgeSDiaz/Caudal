@@ -9,7 +9,7 @@ from app.expenses.domain.entities import DraftExpense, Expense
 from app.expenses.domain.errors import ExpenseNotFoundError
 from app.incomes.domain.entities import DraftIncome, Income
 from app.incomes.domain.errors import IncomeNotFoundError
-from app.reports.domain.entities import CategoryBreakdown
+from app.reports.domain.entities import CategoryBreakdown, SourceBreakdown
 
 
 class InMemoryExpenseRepository:
@@ -170,4 +170,22 @@ class StubMonthlyExpenseReader:
         return self._totals.get((year, month), 0)
 
     def breakdown_for_month(self, year: int, month: int) -> list[CategoryBreakdown]:
+        return self._breakdowns.get((year, month), [])
+
+
+class StubMonthlyIncomeReader:
+    """Satisfies the MonthlyIncomeReader port with canned data per (year, month)."""
+
+    def __init__(
+        self,
+        breakdowns: dict[tuple[int, int], list[SourceBreakdown]] | None = None,
+        totals: dict[tuple[int, int], int] | None = None,
+    ) -> None:
+        self._breakdowns = breakdowns or {}
+        self._totals = totals or {}
+
+    def total_for_month(self, year: int, month: int) -> int:
+        return self._totals.get((year, month), 0)
+
+    def breakdown_for_month(self, year: int, month: int) -> list[SourceBreakdown]:
         return self._breakdowns.get((year, month), [])

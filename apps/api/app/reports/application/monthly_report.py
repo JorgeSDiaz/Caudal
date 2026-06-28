@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.reports.domain.entities import MonthlyReport
-from app.reports.ports.reader import MonthlyExpenseReader
+from app.reports.ports.reader import MonthlyExpenseReader, MonthlyIncomeReader
 from app.shared.domain.errors import DomainValidationError
 
 
@@ -14,25 +14,34 @@ class MonthlyReportQuery:
 
 
 class BuildMonthlyReport:
-    def __init__(self, reader: MonthlyExpenseReader) -> None:
-        self._reader = reader
+    def __init__(self, expenses: MonthlyExpenseReader, incomes: MonthlyIncomeReader) -> None:
+        self._expenses = expenses
+        self._incomes = incomes
 
     def __call__(self, query: MonthlyReportQuery) -> MonthlyReport:
         if not 1 <= query.month <= 12:
             raise DomainValidationError("month must be between 1 and 12")
 
-        breakdown = self._reader.breakdown_for_month(query.year, query.month)
-        total = sum(item.total_cents for item in breakdown)
-
         previous_year, previous_month = _previous_month(query.year, query.month)
-        previous_total = self._reader.total_for_month(previous_year, previous_month)
+
+        by_category = self._expenses.breakdown_for_month(query.year, query.month)
+        expense_total = sum(item.total_cents for item in by_category)
+        previous_expense_total = self._expenses.total_for_month(previous_year, previous_month)
+
+        by_source = self._incomes.breakdown_for_month(query.year, query.month)
+        income_total = sum(item.total_cents for item in by_source)
+        previous_income_total = self._incomes.total_for_month(previous_year, previous_month)
 
         return MonthlyReport(
             year=query.year,
             month=query.month,
-            total_cents=total,
-            previous_month_total_cents=previous_total,
-            by_category=breakdown,
+            expense_total_cents=expense_total,
+            previous_month_expense_total_cents=previous_expense_total,
+            income_total_cents=income_total,
+            previous_month_income_total_cents=previous_income_total,
+            net_cents=income_total - expense_total,
+            by_category=by_category,
+            by_source=by_source,
         )
 
 
