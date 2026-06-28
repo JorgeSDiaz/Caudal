@@ -265,12 +265,29 @@ export interface components {
             year: number;
             /** Month */
             month: number;
-            /** Total Cents */
-            total_cents: number;
-            /** Previous Month Total Cents */
-            previous_month_total_cents: number;
+            /** Expense Total Cents */
+            expense_total_cents: number;
+            /** Previous Month Expense Total Cents */
+            previous_month_expense_total_cents: number;
+            /** Income Total Cents */
+            income_total_cents: number;
+            /** Previous Month Income Total Cents */
+            previous_month_income_total_cents: number;
+            /** Net Cents */
+            net_cents: number;
             /** By Category */
             by_category: components["schemas"]["CategoryBreakdownResponse"][];
+            /** By Source */
+            by_source: components["schemas"]["SourceBreakdownResponse"][];
+        };
+        /** SourceBreakdownResponse */
+        SourceBreakdownResponse: {
+            /** Source Id */
+            source_id: number;
+            /** Source Name */
+            source_name: string;
+            /** Total Cents */
+            total_cents: number;
         };
         /**
          * UpdateExpenseRequest

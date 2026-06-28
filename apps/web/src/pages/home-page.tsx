@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ExpenseForm } from '@/features/expenses/components/expense-form'
 import { IncomeForm } from '@/features/incomes/components/income-form'
-import { MonthSummary } from '@/features/reports/components/month-summary'
+import { BalanceSummary } from '@/features/reports/components/balance-summary'
 import { cn } from '@/lib/utils'
 import { currentMonth } from '@/shared/dates'
 
@@ -49,7 +49,7 @@ export function HomePage() {
       </Card>
 
       <div className="space-y-6">
-        <MonthSummary month={month} />
+        <BalanceSummary month={month} />
         <Card>
           <CardHeader>
             <CardTitle>Ver el detalle</CardTitle>

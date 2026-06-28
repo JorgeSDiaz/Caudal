@@ -18,11 +18,11 @@ import { updateIncome } from '@/features/incomes/api/update-income'
 import type { Income } from '@/features/incomes/income'
 import { monthOf, todayIso } from '@/shared/dates'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/shared/money'
-import { incomesKey } from '@/shared/swr-keys'
+import { incomesKey, reportKey } from '@/shared/swr-keys'
 
-/** Revalidate the month list so the change shows up immediately. */
+/** Revalidate the month list and report so the change shows up immediately. */
 function revalidateMonth(month: string): Promise<unknown> {
-  return mutate(incomesKey(month))
+  return Promise.all([mutate(incomesKey(month)), mutate(reportKey(month))])
 }
 
 export function IncomeForm({
