@@ -1,14 +1,14 @@
 import { api } from '@/api/client'
-import type { BackupDocument } from '@/features/expenses/expense'
+import type { BackupDocument } from '@/features/backup/backup'
 
-/** Fetch the full backup document (every expense) from the API. */
+/** Fetch the full backup document (every expense and income) from the API. */
 export async function fetchBackup(): Promise<BackupDocument> {
   const { data, error } = await api.GET('/api/v1/backup')
   if (error) throw new Error('Failed to export backup')
   return data
 }
 
-/** Restore a backup document; returns how many expenses were imported. */
+/** Restore a backup document; returns how many records were imported. */
 export async function restoreBackup(document: BackupDocument): Promise<number> {
   const { data, error } = await api.POST('/api/v1/backup', { body: document })
   if (error) throw new Error('Failed to import backup')

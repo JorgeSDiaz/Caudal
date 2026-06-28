@@ -12,8 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { fetchBackup, restoreBackup } from '@/features/expenses/api/backup'
-import type { BackupDocument } from '@/features/expenses/expense'
+import { fetchBackup, restoreBackup } from '@/features/backup/api/backup'
+import type { BackupDocument } from '@/features/backup/backup'
 import { todayIso } from '@/shared/dates'
 
 /** Minimal shape check before trusting a user-provided file as a backup. */
@@ -63,9 +63,9 @@ export function BackupControls() {
         return
       }
       const imported = await restoreBackup(parsed)
-      // Imported expenses can land in any month — revalidate every cache key.
+      // Imported records can land in any month — revalidate every cache key.
       await mutate(() => true)
-      toast.success(`${imported} ${imported === 1 ? 'gasto importado' : 'gastos importados'}`)
+      toast.success(`${imported} ${imported === 1 ? 'registro importado' : 'registros importados'}`)
     } catch {
       toast.error('No se pudo importar el respaldo')
     } finally {
@@ -83,20 +83,14 @@ export function BackupControls() {
             <EllipsisVertical className="text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          onCloseAutoFocus={(event) => event.preventDefault()}
-        >
+        <DropdownMenuContent align="end" onCloseAutoFocus={(event) => event.preventDefault()}>
           <DropdownMenuLabel>Respaldo</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={handleExport} disabled={isExporting}>
             <Download />
             Exportar
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => fileInputRef.current?.click()}
-            disabled={isImporting}
-          >
+          <DropdownMenuItem onSelect={() => fileInputRef.current?.click()} disabled={isImporting}>
             <Upload />
             Importar
           </DropdownMenuItem>

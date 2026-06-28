@@ -3,3 +3,4 @@
 import type { components } from '@/api/schema'
 
 export type Category = components['schemas']['CategoryResponse']
+export type CategoryKind = Category['kind']

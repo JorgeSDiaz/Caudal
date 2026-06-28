@@ -4,6 +4,10 @@ export function expensesKey(month: string) {
   return ['expenses', month] as const
 }
 
+export function incomesKey(month: string) {
+  return ['incomes', month] as const
+}
+
 export function reportKey(month: string) {
   return ['report', month] as const
 }
