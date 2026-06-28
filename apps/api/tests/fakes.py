@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from itertools import count
 
-from app.categories.domain.entities import Category
+from app.categories.domain.entities import Category, CategoryKind
 from app.expenses.domain.entities import DraftExpense, Expense
 from app.expenses.domain.errors import ExpenseNotFoundError
 from app.reports.domain.entities import CategoryBreakdown
@@ -70,11 +70,13 @@ class InMemoryCategoryRepository:
     def __init__(self, categories: list[Category]) -> None:
         self._categories = list(categories)
 
-    def list_all(self) -> list[Category]:
-        return list(self._categories)
+    def list_by_kind(self, kind: CategoryKind) -> list[Category]:
+        return [category for category in self._categories if category.kind == kind]
 
-    def exists(self, category_id: int) -> bool:
-        return any(category.id == category_id for category in self._categories)
+    def exists_of_kind(self, category_id: int, kind: CategoryKind) -> bool:
+        return any(
+            category.id == category_id and category.kind == kind for category in self._categories
+        )
 
 
 class InMemoryCategoryChecker:

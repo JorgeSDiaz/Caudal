@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from app.categories.domain.entities import Category
+from app.categories.domain.entities import Category, CategoryKind
 
 
 class CategoryResponse(BaseModel):
@@ -10,6 +10,7 @@ class CategoryResponse(BaseModel):
     name: str
     icon: str | None
     sort_order: int
+    kind: CategoryKind
 
     @classmethod
     def from_entity(cls, category: Category) -> CategoryResponse:
@@ -18,4 +19,5 @@ class CategoryResponse(BaseModel):
             name=category.name,
             icon=category.icon,
             sort_order=category.sort_order,
+            kind=category.kind,
         )
