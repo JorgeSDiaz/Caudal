@@ -1,11 +1,20 @@
 # Caudal
 
-Personal expense-tracking app, designed to grow into a full personal-finance system.
+Personal-finance app for tracking where your money goes **and** where it comes from, designed to grow into a full personal-finance system.
+
+## Features
+
+- **Fast capture** — log an expense or income in seconds (amount, category/source, date, optional note).
+- **Expenses & incomes** — opinionated fixed expense categories and income sources (Sueldo, Freelance, Cashback…), tuned for Colombia (COP).
+- **Monthly expense report** — total, breakdown by category, and month-over-month comparison.
+- **Backup** — export/import all expenses and incomes as a single JSON document.
+
+> Net balance (income vs. expense) is on the roadmap — see the project docs.
 
 ## Stack
 
 - **Backend** — Python 3.12 · FastAPI · SQLModel · PostgreSQL · Alembic
-- **Frontend** — React 19 · TypeScript · Vite · Tailwind CSS · shadcn/ui · SWR
+- **Frontend** — React 19 · TypeScript · Vite · React Router · Tailwind CSS · shadcn/ui · SWR
 - **Contract** — OpenAPI schema → generated typed TS client (`src/api/schema.d.ts`)
 - **Tooling** — uv (Python) · pnpm workspaces · pyright strict · ruff · Docker
 
