@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom'
 
 import { Toaster } from '@/components/ui/sonner'
 import { BackupControls } from '@/features/backup/components/backup-controls'
+import { useRunDueRecurrences } from '@/features/recurrences/hooks/use-run-due-recurrences'
 import { cn } from '@/lib/utils'
 import { currentMonth } from '@/shared/dates'
 
@@ -20,6 +21,7 @@ const navItems = [
 
 export function AppLayout() {
   const month = currentMonth()
+  useRunDueRecurrences()
 
   return (
     <div className="bg-muted/40 flex min-h-svh flex-col">

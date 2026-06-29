@@ -16,9 +16,12 @@ import { useCategories } from '@/features/categories/hooks/use-categories'
 import { createIncome } from '@/features/incomes/api/create-income'
 import { updateIncome } from '@/features/incomes/api/update-income'
 import type { Income } from '@/features/incomes/income'
+import { createRecurrence } from '@/features/recurrences/api/create-recurrence'
+import { RecurrenceConfig } from '@/features/recurrences/components/recurrence-config'
+import { defaultRecurrenceConfig } from '@/features/recurrences/recurrence-config'
 import { monthOf, todayIso } from '@/shared/dates'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/shared/money'
-import { incomesKey, reportKey } from '@/shared/swr-keys'
+import { incomesKey, recurrencesKey, reportKey } from '@/shared/swr-keys'
 
 /** Revalidate the month list and report so the change shows up immediately. */
 function revalidateMonth(month: string): Promise<unknown> {
@@ -40,6 +43,7 @@ export function IncomeForm({
   const [sourceId, setSourceId] = useState(() => (income ? String(income.source_id) : ''))
   const [occurredOn, setOccurredOn] = useState(() => income?.occurred_on ?? todayIso())
   const [note, setNote] = useState(() => income?.note ?? '')
+  const [recurrence, setRecurrence] = useState(defaultRecurrenceConfig)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Derived during render — no effects (rerender-derived-state-no-effect).
@@ -69,6 +73,25 @@ export function IncomeForm({
         ])
         toast.success('Ingreso actualizado')
         onSaved?.()
+      } else if (recurrence.recurring) {
+        await createRecurrence({
+          kind: 'income',
+          amount_cents: amountMinor,
+          currency: 'COP',
+          category_id: Number(sourceId),
+          frequency: recurrence.frequency,
+          day_of_month: recurrence.dayOfMonth,
+          second_day_of_month:
+            recurrence.frequency === 'biweekly' ? recurrence.secondDayOfMonth : null,
+          start_date: occurredOn,
+          end_date: recurrence.endDate === '' ? null : recurrence.endDate,
+          note: trimmedNote,
+        })
+        await mutate(recurrencesKey('income'))
+        toast.success('Recurrencia creada')
+        setAmount('')
+        setNote('')
+        setRecurrence(defaultRecurrenceConfig)
       } else {
         await createIncome({
           amount_cents: amountMinor,
@@ -84,7 +107,12 @@ export function IncomeForm({
         setNote('')
       }
     } catch {
-      toast.error(isEditing ? 'No se pudo actualizar el ingreso' : 'No se pudo registrar el ingreso')
+      const action = isEditing
+        ? 'actualizar el ingreso'
+        : recurrence.recurring
+          ? 'crear la recurrencia'
+          : 'registrar el ingreso'
+      toast.error(`No se pudo ${action}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -122,7 +150,7 @@ export function IncomeForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Fecha</Label>
+        <Label htmlFor="date">{recurrence.recurring ? 'Desde' : 'Fecha'}</Label>
         <Input
           id="date"
           type="date"
@@ -143,8 +171,16 @@ export function IncomeForm({
         />
       </div>
 
+      {!isEditing && <RecurrenceConfig value={recurrence} onChange={setRecurrence} />}
+
       <Button type="submit" size="lg" className="w-full" disabled={!canSubmit}>
-        {isSubmitting ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Registrar ingreso'}
+        {isSubmitting
+          ? 'Guardando…'
+          : isEditing
+            ? 'Guardar cambios'
+            : recurrence.recurring
+              ? 'Crear recurrencia'
+              : 'Registrar ingreso'}
       </Button>
     </form>
   )

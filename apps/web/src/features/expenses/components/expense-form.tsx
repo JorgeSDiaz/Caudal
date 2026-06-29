@@ -16,9 +16,12 @@ import { useCategories } from '@/features/categories/hooks/use-categories'
 import { createExpense } from '@/features/expenses/api/create-expense'
 import { updateExpense } from '@/features/expenses/api/update-expense'
 import type { Expense } from '@/features/expenses/expense'
+import { createRecurrence } from '@/features/recurrences/api/create-recurrence'
+import { RecurrenceConfig } from '@/features/recurrences/components/recurrence-config'
+import { defaultRecurrenceConfig } from '@/features/recurrences/recurrence-config'
 import { monthOf, todayIso } from '@/shared/dates'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/shared/money'
-import { expensesKey, reportKey } from '@/shared/swr-keys'
+import { expensesKey, recurrencesKey, reportKey } from '@/shared/swr-keys'
 
 /** Revalidate the month list and report so the change shows up immediately. */
 function revalidateMonth(month: string): Promise<unknown> {
@@ -42,6 +45,7 @@ export function ExpenseForm({
   )
   const [occurredOn, setOccurredOn] = useState(() => expense?.occurred_on ?? todayIso())
   const [note, setNote] = useState(() => expense?.note ?? '')
+  const [recurrence, setRecurrence] = useState(defaultRecurrenceConfig)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Derived during render — no effects (rerender-derived-state-no-effect).
@@ -71,6 +75,25 @@ export function ExpenseForm({
         ])
         toast.success('Gasto actualizado')
         onSaved?.()
+      } else if (recurrence.recurring) {
+        await createRecurrence({
+          kind: 'expense',
+          amount_cents: amountMinor,
+          currency: 'COP',
+          category_id: Number(categoryId),
+          frequency: recurrence.frequency,
+          day_of_month: recurrence.dayOfMonth,
+          second_day_of_month:
+            recurrence.frequency === 'biweekly' ? recurrence.secondDayOfMonth : null,
+          start_date: occurredOn,
+          end_date: recurrence.endDate === '' ? null : recurrence.endDate,
+          note: trimmedNote,
+        })
+        await mutate(recurrencesKey('expense'))
+        toast.success('Recurrencia creada')
+        setAmount('')
+        setNote('')
+        setRecurrence(defaultRecurrenceConfig)
       } else {
         await createExpense({
           amount_cents: amountMinor,
@@ -86,7 +109,12 @@ export function ExpenseForm({
         setNote('')
       }
     } catch {
-      toast.error(isEditing ? 'No se pudo actualizar el gasto' : 'No se pudo registrar el gasto')
+      const action = isEditing
+        ? 'actualizar el gasto'
+        : recurrence.recurring
+          ? 'crear la recurrencia'
+          : 'registrar el gasto'
+      toast.error(`No se pudo ${action}`)
     } finally {
       setIsSubmitting(false)
     }
@@ -124,7 +152,7 @@ export function ExpenseForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Fecha</Label>
+        <Label htmlFor="date">{recurrence.recurring ? 'Desde' : 'Fecha'}</Label>
         <Input
           id="date"
           type="date"
@@ -145,12 +173,16 @@ export function ExpenseForm({
         />
       </div>
 
+      {!isEditing && <RecurrenceConfig value={recurrence} onChange={setRecurrence} />}
+
       <Button type="submit" size="lg" className="w-full" disabled={!canSubmit}>
         {isSubmitting
           ? 'Guardando…'
           : isEditing
             ? 'Guardar cambios'
-            : 'Registrar gasto'}
+            : recurrence.recurring
+              ? 'Crear recurrencia'
+              : 'Registrar gasto'}
       </Button>
     </form>
   )

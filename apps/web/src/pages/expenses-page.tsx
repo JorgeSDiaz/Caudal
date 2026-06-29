@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ExpenseForm } from '@/features/expenses/components/expense-form'
 import { ExpenseList } from '@/features/expenses/components/expense-list'
+import { RecurrenceList } from '@/features/recurrences/components/recurrence-list'
 import { MonthSummary } from '@/features/reports/components/month-summary'
 import { currentMonth } from '@/shared/dates'
 
@@ -54,6 +55,16 @@ export function ExpensesPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recurrentes</CardTitle>
+            <CardDescription>Gastos fijos que se registran solos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RecurrenceList kind="expense" />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

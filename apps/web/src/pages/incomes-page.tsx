@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { IncomeForm } from '@/features/incomes/components/income-form'
 import { IncomeList } from '@/features/incomes/components/income-list'
+import { RecurrenceList } from '@/features/recurrences/components/recurrence-list'
 import { IncomeSummary } from '@/features/reports/components/income-summary'
 import { currentMonth } from '@/shared/dates'
 
@@ -54,6 +55,16 @@ export function IncomesPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recurrentes</CardTitle>
+            <CardDescription>Ingresos fijos que se registran solos</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RecurrenceList kind="income" />
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

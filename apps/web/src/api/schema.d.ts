@@ -76,6 +76,59 @@ export interface paths {
         patch: operations["update_income_api_v1_incomes__income_id__patch"];
         trace?: never;
     };
+    "/api/v1/recurrences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Recurrences */
+        get: operations["list_recurrences_api_v1_recurrences_get"];
+        put?: never;
+        /** Create Recurrence */
+        post: operations["create_recurrence_api_v1_recurrences_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recurrences/{recurrence_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Recurrence */
+        delete: operations["delete_recurrence_api_v1_recurrences__recurrence_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Recurrence */
+        patch: operations["update_recurrence_api_v1_recurrences__recurrence_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/recurrences/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Run Recurrences */
+        post: operations["run_recurrences_api_v1_recurrences_run_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/categories": {
         parameters: {
             query?: never;
@@ -218,6 +271,38 @@ export interface components {
             /** Note */
             note?: string | null;
         };
+        /** CreateRecurrenceRequest */
+        CreateRecurrenceRequest: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "expense" | "income";
+            /** Amount Cents */
+            amount_cents: number;
+            /** Currency */
+            currency: string;
+            /** Category Id */
+            category_id: number;
+            /**
+             * Frequency
+             * @enum {string}
+             */
+            frequency: "monthly" | "biweekly";
+            /** Day Of Month */
+            day_of_month: number;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /** Second Day Of Month */
+            second_day_of_month?: number | null;
+            /** End Date */
+            end_date?: string | null;
+            /** Note */
+            note?: string | null;
+        };
         /** ExpenseResponse */
         ExpenseResponse: {
             /** Id */
@@ -280,6 +365,44 @@ export interface components {
             /** By Source */
             by_source: components["schemas"]["SourceBreakdownResponse"][];
         };
+        /** RecurrenceResponse */
+        RecurrenceResponse: {
+            /** Id */
+            id: number;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "expense" | "income";
+            /** Amount Cents */
+            amount_cents: number;
+            /** Currency */
+            currency: string;
+            /** Category Id */
+            category_id: number;
+            /**
+             * Frequency
+             * @enum {string}
+             */
+            frequency: "monthly" | "biweekly";
+            /** Day Of Month */
+            day_of_month: number;
+            /** Second Day Of Month */
+            second_day_of_month: number | null;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /** End Date */
+            end_date: string | null;
+            /** Note */
+            note: string | null;
+            /** Is Active */
+            is_active: boolean;
+            /** Next Occurrence On */
+            next_occurrence_on: string | null;
+        };
         /** SourceBreakdownResponse */
         SourceBreakdownResponse: {
             /** Source Id */
@@ -320,6 +443,32 @@ export interface components {
             occurred_on?: string | null;
             /** Note */
             note?: string | null;
+        };
+        /**
+         * UpdateRecurrenceRequest
+         * @description All fields optional; only the ones provided by the client are changed.
+         */
+        UpdateRecurrenceRequest: {
+            /** Amount Cents */
+            amount_cents?: number | null;
+            /** Currency */
+            currency?: string | null;
+            /** Category Id */
+            category_id?: number | null;
+            /** Frequency */
+            frequency?: ("monthly" | "biweekly") | null;
+            /** Day Of Month */
+            day_of_month?: number | null;
+            /** Second Day Of Month */
+            second_day_of_month?: number | null;
+            /** Start Date */
+            start_date?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /** Note */
+            note?: string | null;
+            /** Is Active */
+            is_active?: boolean | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -597,6 +746,157 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_recurrences_api_v1_recurrences_get: {
+        parameters: {
+            query?: {
+                /** @description Filter by kind */
+                kind?: ("expense" | "income") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurrenceResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_recurrence_api_v1_recurrences_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRecurrenceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurrenceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_recurrence_api_v1_recurrences__recurrence_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recurrence_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_recurrence_api_v1_recurrences__recurrence_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recurrence_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRecurrenceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecurrenceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    run_recurrences_api_v1_recurrences_run_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: number;
+                    };
                 };
             };
         };
