@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+from datetime import date
 from itertools import count
 
 from app.categories.domain.entities import Category, CategoryKind
@@ -9,6 +11,8 @@ from app.expenses.domain.entities import DraftExpense, Expense
 from app.expenses.domain.errors import ExpenseNotFoundError
 from app.incomes.domain.entities import DraftIncome, Income
 from app.incomes.domain.errors import IncomeNotFoundError
+from app.recurrences.domain.entities import DraftRecurrence, Recurrence, RecurrenceKind
+from app.recurrences.domain.errors import RecurrenceNotFoundError
 from app.reports.domain.entities import CategoryBreakdown, SourceBreakdown
 
 
@@ -189,3 +193,86 @@ class StubMonthlyIncomeReader:
 
     def breakdown_for_month(self, year: int, month: int) -> list[SourceBreakdown]:
         return self._breakdowns.get((year, month), [])
+
+
+class InMemoryKindCategoryChecker:
+    """Satisfies the recurrences CategoryChecker port; knows a fixed (id, kind) set."""
+
+    def __init__(self, existing: set[tuple[int, str]]) -> None:
+        self._existing = existing
+
+    def exists_of_kind(self, category_id: int, kind: RecurrenceKind) -> bool:
+        return (category_id, kind) in self._existing
+
+
+class RecordingMovementWriter:
+    """Satisfies the MovementWriter port; records what would have been created."""
+
+    def __init__(self) -> None:
+        self.created: list[tuple[RecurrenceKind, int, int, date]] = []
+
+    def create(
+        self,
+        kind: RecurrenceKind,
+        amount_cents: int,
+        currency: str,
+        category_id: int,
+        occurred_on: date,
+        note: str | None,
+    ) -> None:
+        self.created.append((kind, amount_cents, category_id, occurred_on))
+
+
+class InMemoryRecurrenceRepository:
+    """Satisfies the RecurrenceRepository port structurally (typing.Protocol)."""
+
+    def __init__(self) -> None:
+        self._items: dict[int, Recurrence] = {}
+        self._deleted: set[int] = set()
+        self._ids = count(1)
+
+    def add(self, draft: DraftRecurrence) -> Recurrence:
+        recurrence = Recurrence(
+            id=next(self._ids),
+            kind=draft.kind,
+            money=draft.money,
+            category_id=draft.category_id,
+            frequency=draft.frequency,
+            day_of_month=draft.day_of_month,
+            second_day_of_month=draft.second_day_of_month,
+            start_date=draft.start_date,
+            end_date=draft.end_date,
+            note=draft.note,
+            is_active=draft.is_active,
+        )
+        self._items[recurrence.id] = recurrence
+        return recurrence
+
+    def get(self, recurrence_id: int) -> Recurrence | None:
+        if recurrence_id in self._deleted:
+            return None
+        return self._items.get(recurrence_id)
+
+    def list_all(self) -> list[Recurrence]:
+        return [item for item in self._items.values() if item.id not in self._deleted]
+
+    def list_active(self) -> list[Recurrence]:
+        return [item for item in self.list_all() if item.is_active]
+
+    def update(self, recurrence: Recurrence) -> Recurrence:
+        if recurrence.id not in self._items or recurrence.id in self._deleted:
+            raise RecurrenceNotFoundError(recurrence.id)
+        self._items[recurrence.id] = recurrence
+        return recurrence
+
+    def soft_delete(self, recurrence_id: int) -> bool:
+        if recurrence_id not in self._items or recurrence_id in self._deleted:
+            return False
+        self._deleted.add(recurrence_id)
+        return True
+
+    def mark_generated(self, recurrence_id: int, last_generated_on: date) -> None:
+        existing = self._items.get(recurrence_id)
+        if existing is None:
+            return
+        self._items[recurrence_id] = replace(existing, last_generated_on=last_generated_on)

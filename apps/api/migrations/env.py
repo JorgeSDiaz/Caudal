@@ -12,6 +12,7 @@ from sqlmodel import SQLModel
 from app.categories.adapters.outbound.persistence import models as _category_models  # noqa: F401
 from app.expenses.adapters.outbound.persistence import models as _expense_models  # noqa: F401
 from app.incomes.adapters.outbound.persistence import models as _income_models  # noqa: F401
+from app.recurrences.adapters.outbound.persistence import models as _recurrence_models  # noqa: F401
 from app.shared.config import get_settings
 
 config = context.config
