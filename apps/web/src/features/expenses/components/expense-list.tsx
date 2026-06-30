@@ -18,7 +18,7 @@ import { ExpenseForm } from '@/features/expenses/components/expense-form'
 import type { Expense } from '@/features/expenses/expense'
 import { useExpenses } from '@/features/expenses/hooks/use-expenses'
 import { formatMinorUnits } from '@/shared/money'
-import { expensesKey, reportKey } from '@/shared/swr-keys'
+import { monthListMatch, reportKey } from '@/shared/swr-keys'
 
 const dayFormatter = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short' })
 
@@ -28,7 +28,7 @@ function formatDay(isoDate: string): string {
 }
 
 export function ExpenseList({ month }: { month: string }) {
-  const { expenses, isLoading } = useExpenses(month)
+  const { expenses, isLoading, hasMore, loadMore } = useExpenses(month)
   const { categories } = useCategories()
 
   if (isLoading) {
@@ -41,16 +41,23 @@ export function ExpenseList({ month }: { month: string }) {
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
 
   return (
-    <ul className="divide-border divide-y">
-      {expenses.map((expense) => (
-        <ExpenseRow
-          key={expense.id}
-          expense={expense}
-          categoryName={categoryNames.get(expense.category_id) ?? '—'}
-          month={month}
-        />
-      ))}
-    </ul>
+    <div className="space-y-3">
+      <ul className="divide-border divide-y">
+        {expenses.map((expense) => (
+          <ExpenseRow
+            key={expense.id}
+            expense={expense}
+            categoryName={categoryNames.get(expense.category_id) ?? '—'}
+            month={month}
+          />
+        ))}
+      </ul>
+      {hasMore && (
+        <Button variant="outline" size="sm" className="w-full" onClick={loadMore}>
+          Cargar más
+        </Button>
+      )}
+    </div>
   )
 }
 
@@ -68,7 +75,7 @@ function ExpenseRow({
   async function handleDelete() {
     try {
       await deleteExpense(expense.id)
-      await Promise.all([mutate(expensesKey(month)), mutate(reportKey(month))])
+      await Promise.all([mutate(monthListMatch('expenses', month)), mutate(reportKey(month))])
       toast.success('Gasto eliminado')
     } catch {
       toast.error('No se pudo eliminar el gasto')

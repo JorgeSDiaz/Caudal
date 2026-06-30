@@ -18,7 +18,7 @@ import { IncomeForm } from '@/features/incomes/components/income-form'
 import type { Income } from '@/features/incomes/income'
 import { useIncomes } from '@/features/incomes/hooks/use-incomes'
 import { formatMinorUnits } from '@/shared/money'
-import { incomesKey, reportKey } from '@/shared/swr-keys'
+import { monthListMatch, reportKey } from '@/shared/swr-keys'
 
 const dayFormatter = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'short' })
 
@@ -28,7 +28,7 @@ function formatDay(isoDate: string): string {
 }
 
 export function IncomeList({ month }: { month: string }) {
-  const { incomes, isLoading } = useIncomes(month)
+  const { incomes, isLoading, hasMore, loadMore } = useIncomes(month)
   const { categories } = useCategories('income')
 
   if (isLoading) {
@@ -41,16 +41,23 @@ export function IncomeList({ month }: { month: string }) {
   const sourceNames = new Map(categories.map((category) => [category.id, category.name]))
 
   return (
-    <ul className="divide-border divide-y">
-      {incomes.map((income) => (
-        <IncomeRow
-          key={income.id}
-          income={income}
-          sourceName={sourceNames.get(income.source_id) ?? '—'}
-          month={month}
-        />
-      ))}
-    </ul>
+    <div className="space-y-3">
+      <ul className="divide-border divide-y">
+        {incomes.map((income) => (
+          <IncomeRow
+            key={income.id}
+            income={income}
+            sourceName={sourceNames.get(income.source_id) ?? '—'}
+            month={month}
+          />
+        ))}
+      </ul>
+      {hasMore && (
+        <Button variant="outline" size="sm" className="w-full" onClick={loadMore}>
+          Cargar más
+        </Button>
+      )}
+    </div>
   )
 }
 
@@ -68,7 +75,7 @@ function IncomeRow({
   async function handleDelete() {
     try {
       await deleteIncome(income.id)
-      await Promise.all([mutate(incomesKey(month)), mutate(reportKey(month))])
+      await Promise.all([mutate(monthListMatch('incomes', month)), mutate(reportKey(month))])
       toast.success('Ingreso eliminado')
     } catch {
       toast.error('No se pudo eliminar el ingreso')

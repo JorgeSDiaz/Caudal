@@ -7,13 +7,12 @@ import { formatMinorUnits } from '@/shared/money'
 
 export function IncomeSummary({ month }: { month: string }) {
   const { report } = useMonthlyReport(month)
-  const { incomes } = useIncomes(month)
+  const { total: count } = useIncomes(month)
 
   if (!report) {
     return <div className="bg-card h-[104px] rounded-xl border shadow-sm" />
   }
 
-  const count = incomes.length
   const total = report.income_total_cents
   const average = count > 0 ? Math.round(total / count) : 0
   // Earning more than last month is the welcome direction here (opposite of expenses).

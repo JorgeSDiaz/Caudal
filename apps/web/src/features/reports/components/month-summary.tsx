@@ -7,13 +7,12 @@ import { formatMinorUnits } from '@/shared/money'
 
 export function MonthSummary({ month }: { month: string }) {
   const { report } = useMonthlyReport(month)
-  const { expenses } = useExpenses(month)
+  const { total: count } = useExpenses(month)
 
   if (!report) {
     return <div className="bg-card h-[104px] rounded-xl border shadow-sm" />
   }
 
-  const count = expenses.length
   const total = report.expense_total_cents
   const average = count > 0 ? Math.round(total / count) : 0
   // Spending more than last month is the unwelcome direction here.

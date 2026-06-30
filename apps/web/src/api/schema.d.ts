@@ -303,6 +303,16 @@ export interface components {
             /** Note */
             note?: string | null;
         };
+        /**
+         * ExpensePageResponse
+         * @description A page of expenses plus the full count for the month (for "load more").
+         */
+        ExpensePageResponse: {
+            /** Items */
+            items: components["schemas"]["ExpenseResponse"][];
+            /** Total */
+            total: number;
+        };
         /** ExpenseResponse */
         ExpenseResponse: {
             /** Id */
@@ -325,6 +335,16 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * IncomePageResponse
+         * @description A page of incomes plus the full count for the month (for "load more").
+         */
+        IncomePageResponse: {
+            /** Items */
+            items: components["schemas"]["IncomeResponse"][];
+            /** Total */
+            total: number;
         };
         /** IncomeResponse */
         IncomeResponse: {
@@ -497,6 +517,10 @@ export interface operations {
             query: {
                 /** @description Month as YYYY-MM */
                 month: string;
+                /** @description Page size */
+                limit?: number;
+                /** @description Rows to skip */
+                offset?: number;
             };
             header?: never;
             path?: never;
@@ -510,7 +534,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ExpenseResponse"][];
+                    "application/json": components["schemas"]["ExpensePageResponse"];
                 };
             };
             /** @description Validation Error */
@@ -626,6 +650,10 @@ export interface operations {
             query: {
                 /** @description Month as YYYY-MM */
                 month: string;
+                /** @description Page size */
+                limit?: number;
+                /** @description Rows to skip */
+                offset?: number;
             };
             header?: never;
             path?: never;
@@ -639,7 +667,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["IncomeResponse"][];
+                    "application/json": components["schemas"]["IncomePageResponse"];
                 };
             };
             /** @description Validation Error */

@@ -21,11 +21,11 @@ import { RecurrenceConfig } from '@/features/recurrences/components/recurrence-c
 import { defaultRecurrenceConfig } from '@/features/recurrences/recurrence-config'
 import { monthOf, todayIso } from '@/shared/dates'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/shared/money'
-import { expensesKey, recurrencesKey, reportKey } from '@/shared/swr-keys'
+import { monthListMatch, recurrencesKey, reportKey } from '@/shared/swr-keys'
 
-/** Revalidate the month list and report so the change shows up immediately. */
+/** Revalidate the month list (every loaded page) and report so the change shows up immediately. */
 function revalidateMonth(month: string): Promise<unknown> {
-  return Promise.all([mutate(expensesKey(month)), mutate(reportKey(month))])
+  return Promise.all([mutate(monthListMatch('expenses', month)), mutate(reportKey(month))])
 }
 
 export function ExpenseForm({

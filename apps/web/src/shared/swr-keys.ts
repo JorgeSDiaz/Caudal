@@ -1,11 +1,11 @@
 /** Stable SWR keys shared across features so mutations can revalidate them. */
 
-export function expensesKey(month: string) {
-  return ['expenses', month] as const
+export function expensesKey(month: string, limit: number) {
+  return ['expenses', month, limit] as const
 }
 
-export function incomesKey(month: string) {
-  return ['incomes', month] as const
+export function incomesKey(month: string, limit: number) {
+  return ['incomes', month, limit] as const
 }
 
 export function reportKey(month: string) {
@@ -14,4 +14,9 @@ export function reportKey(month: string) {
 
 export function recurrencesKey(kind: 'expense' | 'income') {
   return ['recurrences', kind] as const
+}
+
+/** Matches every loaded page of a month's movement list, regardless of page size. */
+export function monthListMatch(name: 'expenses' | 'incomes', month: string) {
+  return (key: unknown): boolean => Array.isArray(key) && key[0] === name && key[1] === month
 }
