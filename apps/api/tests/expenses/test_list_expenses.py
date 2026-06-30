@@ -27,10 +27,26 @@ def test_list_returns_only_expenses_of_that_month() -> None:
     _record(repository, date(2026, 6, 30))
     _record(repository, date(2026, 5, 31))
 
-    result = ListExpensesForMonth(repository)(ListExpensesForMonthQuery(2026, 6))
+    page = ListExpensesForMonth(repository)(ListExpensesForMonthQuery(2026, 6))
 
-    assert len(result) == 2
-    assert all(expense.occurred_on.month == 6 for expense in result)
+    assert page.total == 2
+    assert len(page.items) == 2
+    assert all(expense.occurred_on.month == 6 for expense in page.items)
+
+
+def test_list_paginates_with_limit_and_offset() -> None:
+    repository = InMemoryExpenseRepository()
+    for day in range(1, 6):  # 5 expenses in June
+        _record(repository, date(2026, 6, day))
+
+    first = ListExpensesForMonth(repository)(ListExpensesForMonthQuery(2026, 6, limit=2, offset=0))
+    second = ListExpensesForMonth(repository)(ListExpensesForMonthQuery(2026, 6, limit=2, offset=2))
+
+    assert first.total == 5  # total is the full month count, not the page size
+    assert len(first.items) == 2
+    assert len(second.items) == 2
+    # Pages don't overlap (most-recent-first ordering is stable).
+    assert {e.id for e in first.items}.isdisjoint({e.id for e in second.items})
 
 
 def test_list_rejects_invalid_month() -> None:

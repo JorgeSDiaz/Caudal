@@ -2,12 +2,19 @@ from __future__ import annotations
 
 from datetime import date
 
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.incomes.adapters.outbound.persistence.models import IncomeModel, utcnow
 from app.incomes.domain.entities import DraftIncome, Income
 from app.incomes.domain.errors import IncomeNotFoundError
 from app.shared.domain.money import Money
+
+
+def _month_bounds(year: int, month: int) -> tuple[date, date]:
+    start = date(year, month, 1)
+    end = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
+    return start, end
 
 
 class SqlIncomeRepository:
@@ -82,9 +89,10 @@ class SqlIncomeRepository:
         self._session.commit()
         return True
 
-    def list_for_month(self, year: int, month: int) -> list[Income]:
-        start = date(year, month, 1)
-        end = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
+    def list_for_month(
+        self, year: int, month: int, limit: int | None = None, offset: int = 0
+    ) -> list[Income]:
+        start, end = _month_bounds(year, month)
         statement = (
             select(IncomeModel)
             .where(
@@ -94,8 +102,19 @@ class SqlIncomeRepository:
             )
             # Most recent first (and stable for same-day entries by id).
             .order_by(IncomeModel.occurred_on.desc(), IncomeModel.id.desc())  # type: ignore[union-attr]
+            .offset(offset)
+            .limit(limit)
         )
         return [_to_entity(row) for row in self._session.exec(statement).all()]
+
+    def count_for_month(self, year: int, month: int) -> int:
+        start, end = _month_bounds(year, month)
+        statement = select(func.count()).where(
+            IncomeModel.deleted_at.is_(None),  # type: ignore[union-attr]
+            IncomeModel.occurred_on >= start,
+            IncomeModel.occurred_on < end,
+        )
+        return int(self._session.exec(statement).one())
 
 
 def _to_entity(model: IncomeModel) -> Income:

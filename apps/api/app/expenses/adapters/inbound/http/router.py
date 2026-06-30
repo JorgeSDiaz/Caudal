@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query, status
 
 from app.expenses.adapters.inbound.http.schemas import (
     CreateExpenseRequest,
+    ExpensePageResponse,
     ExpenseResponse,
     UpdateExpenseRequest,
 )
@@ -22,6 +23,8 @@ from app.expenses.wiring import (
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
 MonthParam = Annotated[str, Query(pattern=r"^\d{4}-\d{2}$", description="Month as YYYY-MM")]
+LimitParam = Annotated[int, Query(ge=1, le=200, description="Page size")]
+OffsetParam = Annotated[int, Query(ge=0, description="Rows to skip")]
 
 
 @router.post("", response_model=ExpenseResponse, status_code=status.HTTP_201_CREATED)
@@ -38,11 +41,18 @@ def create_expense(body: CreateExpenseRequest, use_case: CreateExpenseDep) -> Ex
     return ExpenseResponse.from_entity(expense)
 
 
-@router.get("", response_model=list[ExpenseResponse])
-def list_expenses(use_case: ListExpensesDep, month: MonthParam) -> list[ExpenseResponse]:
+@router.get("", response_model=ExpensePageResponse)
+def list_expenses(
+    use_case: ListExpensesDep, month: MonthParam, limit: LimitParam = 50, offset: OffsetParam = 0
+) -> ExpensePageResponse:
     year, month_number = (int(part) for part in month.split("-"))
-    expenses = use_case(ListExpensesForMonthQuery(year=year, month=month_number))
-    return [ExpenseResponse.from_entity(expense) for expense in expenses]
+    page = use_case(
+        ListExpensesForMonthQuery(year=year, month=month_number, limit=limit, offset=offset)
+    )
+    return ExpensePageResponse(
+        items=[ExpenseResponse.from_entity(expense) for expense in page.items],
+        total=page.total,
+    )
 
 
 @router.patch("/{expense_id}", response_model=ExpenseResponse)

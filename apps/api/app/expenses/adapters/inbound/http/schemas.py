@@ -45,3 +45,10 @@ class ExpenseResponse(BaseModel):
             occurred_on=expense.occurred_on,
             note=expense.note,
         )
+
+
+class ExpensePageResponse(BaseModel):
+    """A page of expenses plus the full count for the month (for "load more")."""
+
+    items: list[ExpenseResponse]
+    total: int

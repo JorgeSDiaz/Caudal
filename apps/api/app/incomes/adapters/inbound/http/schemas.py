@@ -45,3 +45,10 @@ class IncomeResponse(BaseModel):
             occurred_on=income.occurred_on,
             note=income.note,
         )
+
+
+class IncomePageResponse(BaseModel):
+    """A page of incomes plus the full count for the month (for "load more")."""
+
+    items: list[IncomeResponse]
+    total: int

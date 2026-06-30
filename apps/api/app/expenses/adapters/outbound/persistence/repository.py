@@ -2,12 +2,19 @@ from __future__ import annotations
 
 from datetime import date
 
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.expenses.adapters.outbound.persistence.models import ExpenseModel, utcnow
 from app.expenses.domain.entities import DraftExpense, Expense
 from app.expenses.domain.errors import ExpenseNotFoundError
 from app.shared.domain.money import Money
+
+
+def _month_bounds(year: int, month: int) -> tuple[date, date]:
+    start = date(year, month, 1)
+    end = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
+    return start, end
 
 
 class SqlExpenseRepository:
@@ -82,9 +89,10 @@ class SqlExpenseRepository:
         self._session.commit()
         return True
 
-    def list_for_month(self, year: int, month: int) -> list[Expense]:
-        start = date(year, month, 1)
-        end = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
+    def list_for_month(
+        self, year: int, month: int, limit: int | None = None, offset: int = 0
+    ) -> list[Expense]:
+        start, end = _month_bounds(year, month)
         statement = (
             select(ExpenseModel)
             .where(
@@ -94,8 +102,19 @@ class SqlExpenseRepository:
             )
             # Most recent first (and stable for same-day entries by id).
             .order_by(ExpenseModel.occurred_on.desc(), ExpenseModel.id.desc())  # type: ignore[union-attr]
+            .offset(offset)
+            .limit(limit)
         )
         return [_to_entity(row) for row in self._session.exec(statement).all()]
+
+    def count_for_month(self, year: int, month: int) -> int:
+        start, end = _month_bounds(year, month)
+        statement = select(func.count()).where(
+            ExpenseModel.deleted_at.is_(None),  # type: ignore[union-attr]
+            ExpenseModel.occurred_on >= start,
+            ExpenseModel.occurred_on < end,
+        )
+        return int(self._session.exec(statement).one())
 
 
 def _to_entity(model: ExpenseModel) -> Expense:

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query, status
 
 from app.incomes.adapters.inbound.http.schemas import (
     CreateIncomeRequest,
+    IncomePageResponse,
     IncomeResponse,
     UpdateIncomeRequest,
 )
@@ -22,6 +23,8 @@ from app.incomes.wiring import (
 router = APIRouter(prefix="/incomes", tags=["incomes"])
 
 MonthParam = Annotated[str, Query(pattern=r"^\d{4}-\d{2}$", description="Month as YYYY-MM")]
+LimitParam = Annotated[int, Query(ge=1, le=200, description="Page size")]
+OffsetParam = Annotated[int, Query(ge=0, description="Rows to skip")]
 
 
 @router.post("", response_model=IncomeResponse, status_code=status.HTTP_201_CREATED)
@@ -38,11 +41,18 @@ def create_income(body: CreateIncomeRequest, use_case: CreateIncomeDep) -> Incom
     return IncomeResponse.from_entity(income)
 
 
-@router.get("", response_model=list[IncomeResponse])
-def list_incomes(use_case: ListIncomesDep, month: MonthParam) -> list[IncomeResponse]:
+@router.get("", response_model=IncomePageResponse)
+def list_incomes(
+    use_case: ListIncomesDep, month: MonthParam, limit: LimitParam = 50, offset: OffsetParam = 0
+) -> IncomePageResponse:
     year, month_number = (int(part) for part in month.split("-"))
-    incomes = use_case(ListIncomesForMonthQuery(year=year, month=month_number))
-    return [IncomeResponse.from_entity(income) for income in incomes]
+    page = use_case(
+        ListIncomesForMonthQuery(year=year, month=month_number, limit=limit, offset=offset)
+    )
+    return IncomePageResponse(
+        items=[IncomeResponse.from_entity(income) for income in page.items],
+        total=page.total,
+    )
 
 
 @router.patch("/{income_id}", response_model=IncomeResponse)

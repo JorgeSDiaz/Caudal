@@ -24,9 +24,10 @@ def test_list_returns_only_the_requested_month() -> None:
     _create(repository, date(2026, 6, 10))
     _create(repository, date(2026, 7, 1))
 
-    result = ListIncomesForMonth(repository)(ListIncomesForMonthQuery(year=2026, month=6))
+    page = ListIncomesForMonth(repository)(ListIncomesForMonthQuery(year=2026, month=6))
 
-    assert [income.occurred_on for income in result] == [date(2026, 6, 10)]
+    assert page.total == 1
+    assert [income.occurred_on for income in page.items] == [date(2026, 6, 10)]
 
 
 def test_list_rejects_invalid_month() -> None:

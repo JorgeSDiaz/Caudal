@@ -60,7 +60,17 @@ class InMemoryExpenseRepository:
         self._deleted.add(expense_id)
         return True
 
-    def list_for_month(self, year: int, month: int) -> list[Expense]:
+    def list_for_month(
+        self, year: int, month: int, limit: int | None = None, offset: int = 0
+    ) -> list[Expense]:
+        items = self._for_month(year, month)
+        items.sort(key=lambda expense: (expense.occurred_on, expense.id), reverse=True)
+        return items[offset:] if limit is None else items[offset : offset + limit]
+
+    def count_for_month(self, year: int, month: int) -> int:
+        return len(self._for_month(year, month))
+
+    def _for_month(self, year: int, month: int) -> list[Expense]:
         return [
             item
             for item in self._items.values()
@@ -139,7 +149,17 @@ class InMemoryIncomeRepository:
         self._deleted.add(income_id)
         return True
 
-    def list_for_month(self, year: int, month: int) -> list[Income]:
+    def list_for_month(
+        self, year: int, month: int, limit: int | None = None, offset: int = 0
+    ) -> list[Income]:
+        items = self._for_month(year, month)
+        items.sort(key=lambda income: (income.occurred_on, income.id), reverse=True)
+        return items[offset:] if limit is None else items[offset : offset + limit]
+
+    def count_for_month(self, year: int, month: int) -> int:
+        return len(self._for_month(year, month))
+
+    def _for_month(self, year: int, month: int) -> list[Income]:
         return [
             item
             for item in self._items.values()
