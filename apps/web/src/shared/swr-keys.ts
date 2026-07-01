@@ -1,11 +1,11 @@
 /** Stable SWR keys shared across features so mutations can revalidate them. */
 
-export function expensesKey(month: string, limit: number) {
-  return ['expenses', month, limit] as const
+export function expensesKey(month: string, limit: number, offset: number) {
+  return ['expenses', month, limit, offset] as const
 }
 
-export function incomesKey(month: string, limit: number) {
-  return ['incomes', month, limit] as const
+export function incomesKey(month: string, limit: number, offset: number) {
+  return ['incomes', month, limit, offset] as const
 }
 
 export function reportKey(month: string) {

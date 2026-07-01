@@ -17,6 +17,7 @@ import { deleteIncome } from '@/features/incomes/api/delete-income'
 import { IncomeForm } from '@/features/incomes/components/income-form'
 import type { Income } from '@/features/incomes/income'
 import { useIncomes } from '@/features/incomes/hooks/use-incomes'
+import { ListPagination } from '@/shared/components/list-pagination'
 import { formatMinorUnits } from '@/shared/money'
 import { monthListMatch, reportKey } from '@/shared/swr-keys'
 
@@ -28,7 +29,18 @@ function formatDay(isoDate: string): string {
 }
 
 export function IncomeList({ month }: { month: string }) {
-  const { incomes, isLoading, hasMore, loadMore } = useIncomes(month)
+  const {
+    incomes,
+    total,
+    page,
+    pageCount,
+    offset,
+    canGoPrevious,
+    canGoNext,
+    goPrevious,
+    goNext,
+    isLoading,
+  } = useIncomes(month)
   const { categories } = useCategories('income')
 
   if (isLoading) {
@@ -52,11 +64,17 @@ export function IncomeList({ month }: { month: string }) {
           />
         ))}
       </ul>
-      {hasMore && (
-        <Button variant="outline" size="sm" className="w-full" onClick={loadMore}>
-          Cargar más
-        </Button>
-      )}
+      <ListPagination
+        offset={offset}
+        visible={incomes.length}
+        total={total}
+        page={page}
+        pageCount={pageCount}
+        canGoPrevious={canGoPrevious}
+        canGoNext={canGoNext}
+        onPrevious={goPrevious}
+        onNext={goNext}
+      />
     </div>
   )
 }

@@ -17,6 +17,7 @@ import { deleteExpense } from '@/features/expenses/api/delete-expense'
 import { ExpenseForm } from '@/features/expenses/components/expense-form'
 import type { Expense } from '@/features/expenses/expense'
 import { useExpenses } from '@/features/expenses/hooks/use-expenses'
+import { ListPagination } from '@/shared/components/list-pagination'
 import { formatMinorUnits } from '@/shared/money'
 import { monthListMatch, reportKey } from '@/shared/swr-keys'
 
@@ -28,7 +29,18 @@ function formatDay(isoDate: string): string {
 }
 
 export function ExpenseList({ month }: { month: string }) {
-  const { expenses, isLoading, hasMore, loadMore } = useExpenses(month)
+  const {
+    expenses,
+    total,
+    page,
+    pageCount,
+    offset,
+    canGoPrevious,
+    canGoNext,
+    goPrevious,
+    goNext,
+    isLoading,
+  } = useExpenses(month)
   const { categories } = useCategories()
 
   if (isLoading) {
@@ -52,11 +64,17 @@ export function ExpenseList({ month }: { month: string }) {
           />
         ))}
       </ul>
-      {hasMore && (
-        <Button variant="outline" size="sm" className="w-full" onClick={loadMore}>
-          Cargar más
-        </Button>
-      )}
+      <ListPagination
+        offset={offset}
+        visible={expenses.length}
+        total={total}
+        page={page}
+        pageCount={pageCount}
+        canGoPrevious={canGoPrevious}
+        canGoNext={canGoNext}
+        onPrevious={goPrevious}
+        onNext={goNext}
+      />
     </div>
   )
 }
