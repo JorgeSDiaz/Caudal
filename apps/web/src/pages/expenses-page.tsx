@@ -7,7 +7,6 @@ import { MonthSummary } from '@/features/reports/components/month-summary'
 import {
   BentoCard,
   BentoCardContent,
-  BentoCardDescription,
   BentoCardHeader,
   BentoCardTitle,
 } from '@/shared/components/bento-card'
@@ -24,12 +23,11 @@ export function ExpensesPage() {
   const month = currentMonth()
 
   return (
-    <div className="grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(460px,1fr)_minmax(390px,0.9fr)]">
+    <div className="grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
       <div className="space-y-5 xl:sticky xl:top-5">
         <BentoCard>
           <BentoCardHeader>
             <BentoCardTitle>Registrar gasto</BentoCardTitle>
-            <BentoCardDescription>Captura rápida del periodo</BentoCardDescription>
           </BentoCardHeader>
           <BentoCardContent>
             <ExpenseForm />
@@ -39,7 +37,6 @@ export function ExpensesPage() {
         <BentoCard>
           <BentoCardHeader>
             <BentoCardTitle>Recurrentes</BentoCardTitle>
-            <BentoCardDescription>Gastos fijos activos</BentoCardDescription>
           </BentoCardHeader>
           <BentoCardContent>
             <RecurrenceList kind="expense" />
@@ -50,28 +47,28 @@ export function ExpensesPage() {
       <div className="space-y-5">
         <MonthSummary month={month} />
 
-        <BentoCard>
-          <BentoCardHeader>
-            <BentoCardTitle>En qué se fue</BentoCardTitle>
-            <BentoCardDescription>Desglose por categoría</BentoCardDescription>
-          </BentoCardHeader>
-          <BentoCardContent>
-            <Suspense fallback={<p className="text-muted-foreground text-sm">Cargando…</p>}>
-              <CategoryBreakdown month={month} />
-            </Suspense>
-          </BentoCardContent>
-        </BentoCard>
-      </div>
+        <div className="grid items-start gap-5 2xl:grid-cols-[minmax(0,1fr)_390px]">
+          <BentoCard className="2xl:col-start-2">
+            <BentoCardHeader>
+              <BentoCardTitle>En qué se fue</BentoCardTitle>
+            </BentoCardHeader>
+            <BentoCardContent>
+              <Suspense fallback={<p className="text-muted-foreground text-sm">Cargando…</p>}>
+                <CategoryBreakdown month={month} />
+              </Suspense>
+            </BentoCardContent>
+          </BentoCard>
 
-      <BentoCard className="xl:col-start-2 2xl:col-start-auto">
-        <BentoCardHeader>
-          <BentoCardTitle>Movimientos</BentoCardTitle>
-          <BentoCardDescription>Tus gastos del periodo</BentoCardDescription>
-        </BentoCardHeader>
-        <BentoCardContent>
-          <ExpenseList month={month} />
-        </BentoCardContent>
-      </BentoCard>
+          <BentoCard className="2xl:col-start-1 2xl:row-start-1">
+            <BentoCardHeader>
+              <BentoCardTitle>Movimientos</BentoCardTitle>
+            </BentoCardHeader>
+            <BentoCardContent>
+              <ExpenseList month={month} />
+            </BentoCardContent>
+          </BentoCard>
+        </div>
+      </div>
     </div>
   )
 }

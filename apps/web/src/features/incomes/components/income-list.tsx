@@ -101,7 +101,7 @@ function IncomeRow({
   }
 
   return (
-    <li className="flex items-center justify-between gap-3 py-3">
+    <li className="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
       <div className="min-w-0">
         <p className="truncate font-medium">{sourceName}</p>
         <p className="text-muted-foreground truncate text-sm">
@@ -109,32 +109,34 @@ function IncomeRow({
           {income.note ? ` · ${income.note}` : ''}
         </p>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between gap-3 sm:justify-end">
         <span className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
           {formatMinorUnits(income.amount_cents)}
         </span>
-        <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={`Editar ingreso de ${sourceName}`}>
-              <Pencil className="text-muted-foreground" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Editar ingreso</DialogTitle>
-              <DialogDescription>Ajusta monto, fuente, fecha o nota.</DialogDescription>
-            </DialogHeader>
-            <IncomeForm income={income} onSaved={() => setIsEditing(false)} />
-          </DialogContent>
-        </Dialog>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={`Eliminar ingreso de ${sourceName}`}
-          onClick={handleDelete}
-        >
-          <Trash2 className="text-muted-foreground" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Dialog open={isEditing} onOpenChange={setIsEditing}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={`Editar ingreso de ${sourceName}`}>
+                <Pencil className="text-muted-foreground" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar ingreso</DialogTitle>
+                <DialogDescription>Ajusta monto, fuente, fecha o nota.</DialogDescription>
+              </DialogHeader>
+              <IncomeForm income={income} onSaved={() => setIsEditing(false)} />
+            </DialogContent>
+          </Dialog>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`Eliminar ingreso de ${sourceName}`}
+            onClick={handleDelete}
+          >
+            <Trash2 className="text-muted-foreground" />
+          </Button>
+        </div>
       </div>
     </li>
   )

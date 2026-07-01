@@ -101,7 +101,7 @@ function ExpenseRow({
   }
 
   return (
-    <li className="flex items-center justify-between gap-3 py-3">
+    <li className="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
       <div className="min-w-0">
         <p className="truncate font-medium">{categoryName}</p>
         <p className="text-muted-foreground truncate text-sm">
@@ -109,30 +109,32 @@ function ExpenseRow({
           {expense.note ? ` · ${expense.note}` : ''}
         </p>
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-between gap-3 sm:justify-end">
         <span className="font-semibold tabular-nums">{formatMinorUnits(expense.amount_cents)}</span>
-        <Dialog open={isEditing} onOpenChange={setIsEditing}>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={`Editar gasto de ${categoryName}`}>
-              <Pencil className="text-muted-foreground" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Editar gasto</DialogTitle>
-              <DialogDescription>Ajusta monto, categoría, fecha o nota.</DialogDescription>
-            </DialogHeader>
-            <ExpenseForm expense={expense} onSaved={() => setIsEditing(false)} />
-          </DialogContent>
-        </Dialog>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={`Eliminar gasto de ${categoryName}`}
-          onClick={handleDelete}
-        >
-          <Trash2 className="text-muted-foreground" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Dialog open={isEditing} onOpenChange={setIsEditing}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label={`Editar gasto de ${categoryName}`}>
+                <Pencil className="text-muted-foreground" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Editar gasto</DialogTitle>
+                <DialogDescription>Ajusta monto, categoría, fecha o nota.</DialogDescription>
+              </DialogHeader>
+              <ExpenseForm expense={expense} onSaved={() => setIsEditing(false)} />
+            </DialogContent>
+          </Dialog>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`Eliminar gasto de ${categoryName}`}
+            onClick={handleDelete}
+          >
+            <Trash2 className="text-muted-foreground" />
+          </Button>
+        </div>
       </div>
     </li>
   )
