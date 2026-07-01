@@ -14,6 +14,7 @@ from app.incomes.domain.errors import IncomeNotFoundError
 from app.recurrences.domain.entities import DraftRecurrence, Recurrence, RecurrenceKind
 from app.recurrences.domain.errors import RecurrenceNotFoundError
 from app.reports.domain.entities import CategoryBreakdown, SourceBreakdown
+from app.shared.domain.financial_period import in_financial_month
 
 
 class InMemoryExpenseRepository:
@@ -74,9 +75,7 @@ class InMemoryExpenseRepository:
         return [
             item
             for item in self._items.values()
-            if item.id not in self._deleted
-            and item.occurred_on.year == year
-            and item.occurred_on.month == month
+            if item.id not in self._deleted and in_financial_month(item.occurred_on, year, month)
         ]
 
 
@@ -163,9 +162,7 @@ class InMemoryIncomeRepository:
         return [
             item
             for item in self._items.values()
-            if item.id not in self._deleted
-            and item.occurred_on.year == year
-            and item.occurred_on.month == month
+            if item.id not in self._deleted and in_financial_month(item.occurred_on, year, month)
         ]
 
 

@@ -21,17 +21,17 @@ def _record(repository: InMemoryExpenseRepository, occurred_on: date) -> None:
     )
 
 
-def test_list_returns_only_expenses_of_that_month() -> None:
+def test_list_returns_only_expenses_of_that_financial_month() -> None:
     repository = InMemoryExpenseRepository()
-    _record(repository, date(2026, 6, 1))
+    _record(repository, date(2026, 6, 29))
     _record(repository, date(2026, 6, 30))
-    _record(repository, date(2026, 5, 31))
+    _record(repository, date(2026, 7, 29))
+    _record(repository, date(2026, 7, 30))
 
-    page = ListExpensesForMonth(repository)(ListExpensesForMonthQuery(2026, 6))
+    page = ListExpensesForMonth(repository)(ListExpensesForMonthQuery(2026, 7))
 
     assert page.total == 2
-    assert len(page.items) == 2
-    assert all(expense.occurred_on.month == 6 for expense in page.items)
+    assert [expense.occurred_on for expense in page.items] == [date(2026, 7, 29), date(2026, 6, 30)]
 
 
 def test_list_paginates_with_limit_and_offset() -> None:

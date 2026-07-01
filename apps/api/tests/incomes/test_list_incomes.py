@@ -19,15 +19,17 @@ def _create(repository: InMemoryIncomeRepository, occurred_on: date) -> None:
     )
 
 
-def test_list_returns_only_the_requested_month() -> None:
+def test_list_returns_only_the_requested_financial_month() -> None:
     repository = InMemoryIncomeRepository()
-    _create(repository, date(2026, 6, 10))
-    _create(repository, date(2026, 7, 1))
+    _create(repository, date(2026, 6, 29))
+    _create(repository, date(2026, 6, 30))
+    _create(repository, date(2026, 7, 29))
+    _create(repository, date(2026, 7, 30))
 
-    page = ListIncomesForMonth(repository)(ListIncomesForMonthQuery(year=2026, month=6))
+    page = ListIncomesForMonth(repository)(ListIncomesForMonthQuery(year=2026, month=7))
 
-    assert page.total == 1
-    assert [income.occurred_on for income in page.items] == [date(2026, 6, 10)]
+    assert page.total == 2
+    assert [income.occurred_on for income in page.items] == [date(2026, 7, 29), date(2026, 6, 30)]
 
 
 def test_list_rejects_invalid_month() -> None:
