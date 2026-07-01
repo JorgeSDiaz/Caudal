@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { CalendarClock, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { mutate } from 'swr'
 
@@ -19,7 +19,12 @@ export function RecurrenceList({ kind }: { kind: RecurrenceKind }) {
     return <p className="text-muted-foreground text-sm">Cargando…</p>
   }
   if (recurrences.length === 0) {
-    return <p className="text-muted-foreground text-sm">Aún no hay recurrencias.</p>
+    return (
+      <div className="bg-muted/50 flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-6 text-center">
+        <CalendarClock className="text-muted-foreground size-5" />
+        <p className="text-muted-foreground text-sm">Aún no hay recurrencias.</p>
+      </div>
+    )
   }
 
   const names = new Map(categories.map((category) => [category.id, category.name]))
@@ -58,7 +63,7 @@ function RecurrenceRow({
   }
 
   return (
-    <li className="flex items-center justify-between gap-3 py-3">
+    <li className="flex items-center justify-between gap-3 py-2.5">
       <div className="min-w-0">
         <p className="truncate font-medium">{name}</p>
         <p className="text-muted-foreground truncate text-sm">

@@ -10,7 +10,7 @@ export function IncomeSummary({ month }: { month: string }) {
   const { total: count } = useIncomes(month)
 
   if (!report) {
-    return <div className="bg-card h-[104px] rounded-xl border shadow-sm" />
+    return <div className="bg-card h-[104px] rounded-lg border shadow-sm" />
   }
 
   const total = report.income_total_cents
@@ -19,13 +19,13 @@ export function IncomeSummary({ month }: { month: string }) {
   const change = changePercent(total, report.previous_month_income_total_cents)
 
   return (
-    <div className="bg-card text-card-foreground flex flex-wrap items-end justify-between gap-x-10 gap-y-4 rounded-xl border p-6 shadow-sm">
+    <div className="bg-card text-card-foreground flex flex-wrap items-end justify-between gap-x-10 gap-y-3 rounded-lg border px-5 py-4 shadow-sm">
       <div className="space-y-1">
         <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
           Ingresado este mes
         </p>
         <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
-          <p className="text-4xl font-semibold tracking-tight tabular-nums">
+          <p className="text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl">
             {formatMinorUnits(total)}
           </p>
           {change !== null && (

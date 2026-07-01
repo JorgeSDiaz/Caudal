@@ -12,7 +12,7 @@ export function BalanceSummary({ month }: { month: string }) {
   const { report } = useMonthlyReport(month)
 
   if (!report) {
-    return <div className="bg-card h-[148px] rounded-xl border shadow-sm" />
+    return <div className="bg-card h-[148px] rounded-lg border shadow-sm" />
   }
 
   const net = report.net_cents
@@ -20,7 +20,7 @@ export function BalanceSummary({ month }: { month: string }) {
   const rate = savingsRate(report.income_total_cents, net)
 
   return (
-    <div className="bg-card text-card-foreground space-y-5 rounded-xl border p-6 shadow-sm">
+    <div className="bg-card text-card-foreground space-y-5 rounded-lg border p-5 shadow-sm">
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
         <div className="space-y-1">
           <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
@@ -28,7 +28,7 @@ export function BalanceSummary({ month }: { month: string }) {
           </p>
           <p
             className={cn(
-              'text-4xl font-semibold tracking-tight tabular-nums',
+                'text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl',
               isPositive ? 'text-emerald-600' : 'text-red-600',
             )}
           >

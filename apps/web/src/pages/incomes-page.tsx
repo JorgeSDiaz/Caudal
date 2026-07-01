@@ -1,10 +1,16 @@
 import { Suspense, lazy } from 'react'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { IncomeForm } from '@/features/incomes/components/income-form'
 import { IncomeList } from '@/features/incomes/components/income-list'
 import { RecurrenceList } from '@/features/recurrences/components/recurrence-list'
 import { IncomeSummary } from '@/features/reports/components/income-summary'
+import {
+  BentoCard,
+  BentoCardContent,
+  BentoCardDescription,
+  BentoCardHeader,
+  BentoCardTitle,
+} from '@/shared/components/bento-card'
 import { currentMonth } from '@/shared/dates'
 
 // Code-split the chart-heavy breakdown (Recharts) out of the initial bundle.
@@ -18,54 +24,54 @@ export function IncomesPage() {
   const month = currentMonth()
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[380px_1fr]">
-      <Card>
-        <CardHeader>
-          <CardTitle>Registrar ingreso</CardTitle>
-          <CardDescription>Sueldo, freelance, cashback…</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <IncomeForm />
-        </CardContent>
-      </Card>
+    <div className="grid items-start gap-5 xl:grid-cols-[340px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(460px,1fr)_minmax(390px,0.9fr)]">
+      <div className="space-y-5 xl:sticky xl:top-5">
+        <BentoCard>
+          <BentoCardHeader>
+            <BentoCardTitle>Registrar ingreso</BentoCardTitle>
+            <BentoCardDescription>Entradas del periodo</BentoCardDescription>
+          </BentoCardHeader>
+          <BentoCardContent>
+            <IncomeForm />
+          </BentoCardContent>
+        </BentoCard>
 
-      <div className="space-y-6">
+        <BentoCard>
+          <BentoCardHeader>
+            <BentoCardTitle>Recurrentes</BentoCardTitle>
+            <BentoCardDescription>Ingresos fijos activos</BentoCardDescription>
+          </BentoCardHeader>
+          <BentoCardContent>
+            <RecurrenceList kind="income" />
+          </BentoCardContent>
+        </BentoCard>
+      </div>
+
+      <div className="space-y-5">
         <IncomeSummary month={month} />
 
-        <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle>De dónde viene</CardTitle>
-              <CardDescription>Desglose por fuente</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Suspense fallback={<p className="text-muted-foreground text-sm">Cargando…</p>}>
-                <SourceBreakdown month={month} />
-              </Suspense>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Movimientos</CardTitle>
-              <CardDescription>Tus ingresos del mes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <IncomeList month={month} />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recurrentes</CardTitle>
-            <CardDescription>Ingresos fijos que se registran solos</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RecurrenceList kind="income" />
-          </CardContent>
-        </Card>
+        <BentoCard>
+          <BentoCardHeader>
+            <BentoCardTitle>De dónde viene</BentoCardTitle>
+            <BentoCardDescription>Desglose por fuente</BentoCardDescription>
+          </BentoCardHeader>
+          <BentoCardContent>
+            <Suspense fallback={<p className="text-muted-foreground text-sm">Cargando…</p>}>
+              <SourceBreakdown month={month} />
+            </Suspense>
+          </BentoCardContent>
+        </BentoCard>
       </div>
+
+      <BentoCard className="xl:col-start-2 2xl:col-start-auto">
+        <BentoCardHeader>
+          <BentoCardTitle>Movimientos</BentoCardTitle>
+          <BentoCardDescription>Tus ingresos del periodo</BentoCardDescription>
+        </BentoCardHeader>
+        <BentoCardContent>
+          <IncomeList month={month} />
+        </BentoCardContent>
+      </BentoCard>
     </div>
   )
 }
