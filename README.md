@@ -6,10 +6,11 @@ Personal-finance app for tracking where your money goes **and** where it comes f
 
 - **Fast capture** — log an expense or income in seconds (amount, category/source, date, optional note).
 - **Expenses & incomes** — opinionated fixed expense categories and income sources (Sueldo, Freelance, Cashback…), tuned for Colombia (COP).
-- **Monthly expense report** — total, breakdown by category, and month-over-month comparison.
+- **Financial periods** — reports and lists use a personal cycle from the 30th to the 30th instead of calendar months.
+- **Monthly reports** — expense, income, net balance, averages, breakdowns, and month-over-month comparison.
+- **Recurring movements** — create fixed expenses or incomes from the capture forms and review them alongside the workflow.
+- **Bento dashboard** — compact sidebar navigation with capture, analysis, recurrentes, and movement lists arranged for daily use.
 - **Backup** — export/import all expenses and incomes as a single JSON document.
-
-> Net balance (income vs. expense) is on the roadmap — see the project docs.
 
 ## Stack
 
