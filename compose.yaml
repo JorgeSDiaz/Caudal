@@ -33,13 +33,11 @@ services:
       context: ./apps/api
       target: dev
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      WATCHFILES_FORCE_POLLING: "true" # reliable --reload on Windows bind mounts
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     ports:
       - "8000:8000"
     volumes:
-      - ./apps/api:/app        # live source for --reload
-      - /app/.venv             # keep the image's Linux venv (mask host's)
+      - ./apps/api:/app        # live source for go run
     depends_on:
       db:
         condition: service_healthy

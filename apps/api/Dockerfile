@@ -1,30 +1,24 @@
 # syntax=docker/dockerfile:1
 
-# ---- base: Python 3.12 + uv ----
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS base
+FROM golang:1.26-bookworm AS dev
 WORKDIR /app
-ENV UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy \
-    UV_PROJECT_ENVIRONMENT=/app/.venv \
-    PATH="/app/.venv/bin:$PATH"
-
-# ---- deps: install dependencies into /app/.venv (cached layer) ----
-FROM base AS deps
-COPY pyproject.toml uv.lock ./
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
-
-# ---- dev: hot-reload server; source is bind-mounted by compose ----
-FROM deps AS dev
+COPY go.mod go.sum* ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY . .
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["go", "run", "./cmd/api"]
 
-# ---- runtime: slim production image with code baked in ----
-FROM python:3.12-slim AS runtime
+FROM golang:1.26-bookworm AS build
+WORKDIR /src
+COPY go.mod go.sum* ./
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /out/api ./cmd/api
+
+FROM gcr.io/distroless/static-debian12 AS runtime
 WORKDIR /app
-ENV PYTHONUNBUFFERED=1 \
-    PATH="/app/.venv/bin:$PATH"
-COPY --from=deps /app/.venv /app/.venv
-COPY app ./app
+COPY --from=build /out/api /app/api
+COPY db/migrations /app/db/migrations
+COPY openapi /app/openapi
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/app/api"]

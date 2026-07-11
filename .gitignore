@@ -1,12 +1,16 @@
-# Python
-__pycache__/
-*.py[cod]
-.venv/
 .env
 
 # Node
 node_modules/
 dist/
+
+# Go
+*.exe
+*.test
+*.out
+coverage.*
+bin/
+tmp/
 
 # IDE / OS
 .vscode/

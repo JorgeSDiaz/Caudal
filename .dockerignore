@@ -1,7 +1,9 @@
 .git
 **/node_modules
-**/.venv
 **/dist
-**/__pycache__
-**/*.py[cod]
-**/.pytest_cache
+**/tmp
+**/*.exe
+**/*.test
+**/*.out
+**/coverage.*
+**/bin

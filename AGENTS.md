@@ -7,20 +7,20 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 ```bash
 # API
 cd apps/api
-uv run pytest -q                                             # all tests
-uv run pytest tests/expenses/test_create_expense.py         # single file
-uv run pytest -k "test_create"                              # by name pattern
-uv run ruff check app && uv run ruff format app             # lint + format
+go test ./...                                                # all tests
+go test ./internal/expenses/application                      # single package
+go test ./... -run TestCreateExpense                         # by test name
+gofmt -w cmd internal tools.go                               # format
+go build ./cmd/api                                           # compile API
 
 # Web
 pnpm --filter web exec tsc -p tsconfig.app.json --noEmit   # typecheck
 pnpm --filter web exec eslint src                           # lint
 pnpm --filter web build                                     # production build (validates lazy-import paths)
-pnpm --filter web run generate:api                          # regenerate schema.d.ts (API must be running)
+pnpm --filter web run generate:api                          # regenerate schema.d.ts from apps/api/openapi/caudal.yaml
 ```
 
 The API requires `DATABASE_URL` in `apps/api/.env`. For host dev: `docker compose up -d db` first.
-On Windows, always use `python -m uvicorn` — Smart App Control blocks unsigned venv `.exe` shims.
 When adding a web dependency, install it inside the running container (the container has a Linux-specific `node_modules` volume that masks the host's).
 
 ---
@@ -29,17 +29,19 @@ When adding a web dependency, install it inside the running container (the conta
 
 ### Backend — Hexagonal + Screaming
 
-Structure screams the domain, not the framework. Every bounded context (`expenses`, `categories`, `reports`) repeats the same internal layout:
+Structure screams the domain, not the framework. Every bounded context (`expenses`, `categories`, `reports`, `incomes`, `recurrences`) repeats the same internal layout:
 
 ```
 <context>/
-  domain/              # pure Python — no framework, no persistence; invariants in __post_init__
-  ports/               # typing.Protocol contracts owned by this context
-  application/         # one use case per file: class with __call__ + frozen Command/Query dataclass
+  domain/              # pure Go — no framework, no persistence; invariants in constructors
+  ports/               # interfaces owned by this context
+  application/         # one use case per file: struct with Execute + Command/Query types
   adapters/
-    inbound/http/      # FastAPI router + Pydantic schemas
-    outbound/          # concrete adapters satisfying ports
-  wiring.py            # composition root: wires adapters into use cases, exposes Annotated FastAPI deps
+    http/              # net/http handlers + DTOs
+    persistence/       # GORM models/repositories satisfying ports
+
+internal/platform/ contains shared technical implementation: config, logging, HTTP helpers, clock, GORM setup, and migrations. It must not contain business rules.
+internal/app/router.go is the composition root.
 ```
 
 ### Frontend — Screaming feature-sliced
@@ -63,16 +65,16 @@ Cross-feature helpers go in `src/shared/` (`money.ts`, `dates.ts`, `swr-keys.ts`
 These are the non-negotiable constraints. New code must fit them; when in doubt, match the existing pattern rather than introducing a new one.
 
 ### Interfaces before implementations
-The consumer defines the contract it needs; the concrete implementation satisfies it and is wired at a single composition root. In the backend this is `typing.Protocol` + `wiring.py`. In the frontend this is the hook: components depend on the hook's return shape, not on the fetch implementation.
+The consumer defines the contract it needs; the concrete implementation satisfies it and is wired at a single composition root. In the backend this is Go `interface` + `internal/app/router.go`. In the frontend this is the hook: components depend on the hook's return shape, not on the fetch implementation.
 
 ### Decoupled contexts
-A context never imports another context's adapters or internals. Cross-context coupling goes through a port defined by the *consumer*. Example: `expenses` needs to validate categories but defines its own `CategoryChecker` port (`exists(id)` only) and wires it in `wiring.py` — it never imports from `categories/adapters/`.
+A context never imports another context's adapters or internals. Cross-context coupling goes through a port defined by the *consumer*. Example: `expenses` needs to validate categories but defines its own `CategoryChecker` port and wires an implementation in `internal/app/router.go`.
 
 ### One responsibility per unit
 One use case per file, one request function per `api/` file, one hook per data concern, one component per UI responsibility. If a unit needs a long comment to explain what it does, it is doing too much.
 
 ### No framework in the domain
-Nothing from FastAPI, SQLModel, or Pydantic inside `domain/`. Domain errors map to HTTP status codes in `app/main.py`, not in the domain or application layers.
+Nothing from `net/http`, GORM, JSON DTOs, or SQL models inside `domain/`. Domain errors map to HTTP status codes in HTTP adapters, not in the domain or application layers.
 
 ### Comments explain *why*, never *what*
 The name says what; a comment is only warranted when there is a non-obvious constraint, invariant, or workaround that would surprise a future reader. Module-level docstrings that restate the file name are noise — delete them. Class/field docstrings that feed the OpenAPI schema are kept.
@@ -84,7 +86,7 @@ State that can be computed from existing data is computed during render, not in 
 Each domain type (`Expense`, `Category`, `MonthlyReport`) is declared once in `<feature>.ts` re-exporting from the OpenAPI schema. No file redeclares a type that already exists elsewhere.
 
 ### OpenAPI contract
-When backend routes or schemas change, regenerate the TS client (`pnpm --filter web run generate:api` with the API running). All frontend API types derive from `src/api/schema.d.ts` — never hand-write them.
+When backend routes or schemas change, update `apps/api/openapi/caudal.yaml` and regenerate the TS client (`pnpm --filter web run generate:api`). All frontend API types derive from `src/api/schema.d.ts` — never hand-write them.
 
 ### Database migrations
-Alembic is the DDL source of truth, not the SQLModel models. Migration files live in `apps/api/migrations/versions/`.
+Goose SQL migrations are the DDL source of truth, not GORM models. Migration files live in `apps/api/db/migrations/`.

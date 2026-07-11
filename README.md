@@ -7,17 +7,17 @@ Personal-finance app for tracking where your money goes **and** where it comes f
 - **Fast capture** — log an expense or income in seconds (amount, category/source, date, optional note).
 - **Expenses & incomes** — opinionated fixed expense categories and income sources (Sueldo, Freelance, Cashback…), tuned for Colombia (COP).
 - **Financial periods** — reports and lists use a personal cycle from the 30th to the 30th instead of calendar months.
-- **Monthly reports** — expense, income, net balance, averages, breakdowns, and month-over-month comparison.
-- **Recurring movements** — create fixed expenses or incomes from the capture forms and review them alongside the workflow.
+- **Monthly reports** — expense, income, net balance, breakdowns, and month-over-month comparison.
+- **Recurring movements** — create fixed expenses or incomes and materialize due occurrences into real movements.
 - **Bento dashboard** — compact sidebar navigation with capture, analysis, recurrentes, and movement lists arranged for daily use.
 - **Backup** — export/import all expenses and incomes as a single JSON document.
 
 ## Stack
 
-- **Backend** — Python 3.12 · FastAPI · SQLModel · PostgreSQL · Alembic
+- **Backend** — Go 1.26 · net/http · GORM · PostgreSQL · goose · slog · testify
 - **Frontend** — React 19 · TypeScript · Vite · React Router · Tailwind CSS · shadcn/ui · SWR
-- **Contract** — OpenAPI schema → generated typed TS client (`src/api/schema.d.ts`)
-- **Tooling** — uv (Python) · pnpm workspaces · pyright strict · ruff · Docker
+- **Contract** — OpenAPI YAML → generated typed TS client (`src/api/schema.d.ts`)
+- **Tooling** — Go toolchain · pnpm workspaces · Docker
 
 ## Running locally
 
@@ -32,28 +32,48 @@ docker compose up           # afterwards
 |---------|-----|
 | Web | http://localhost:5173 |
 | API | http://localhost:8000 |
-| API docs | http://localhost:8000/docs |
+| OpenAPI | http://localhost:8000/openapi.json |
 | DB | localhost:5432 |
 
-### Option B — host (DB in Docker)
+### Option B — host API and web, DB in Docker
 
 ```bash
 # 1. Start only the database
 docker compose up -d db
 
-# 2. Install JS deps (from repo root)
+# 2. API — copy .env.example and fill in DATABASE_URL if needed
+cd apps/api
+go mod download
+go run ./cmd/api
+
+# 3. Web (separate terminal, from repo root)
 pnpm install
-
-# 3. API — copy .env.example and fill in DATABASE_URL
-cd apps/api && cp ../../.env.example .env
-uv sync
-uv run python -m uvicorn app.main:app --reload
-
-# 4. Web (separate terminal, from repo root)
 pnpm --filter web dev
 ```
 
-> **Windows note:** always use `python -m uvicorn` — Smart App Control blocks unsigned venv `.exe` shims.
+## Useful Commands
+
+```bash
+# API
+cd apps/api
+go test ./...
+go build ./cmd/api
+gofmt -w cmd internal tools.go
+
+# Web
+pnpm --filter web exec tsc -p tsconfig.app.json --noEmit
+pnpm --filter web exec eslint src
+pnpm --filter web build
+pnpm --filter web run generate:api
+```
+
+## Architecture
+
+The backend is a modular monolith using screaming + hexagonal architecture. Domain logic lives in each context under `internal/<context>/domain`, contracts live in `ports`, use cases live in `application`, and technical adapters live in `adapters/http` or `adapters/persistence`.
+
+Shared technical code lives in `internal/platform`: config, logging, HTTP helpers, clock, GORM setup, and goose migrations. It must stay free of business rules.
+
+Goose SQL migrations in `apps/api/db/migrations` are the DDL source of truth. GORM models are persistence models only, not domain entities.
 
 ## License
 
