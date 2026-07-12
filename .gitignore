@@ -11,6 +11,8 @@ dist/
 coverage.*
 bin/
 tmp/
+# compiled API binary from `go build ./cmd/api`
+/apps/api/api
 
 # IDE / OS
 .vscode/
