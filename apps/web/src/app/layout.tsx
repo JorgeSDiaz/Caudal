@@ -1,4 +1,11 @@
-import { Home, PanelLeftClose, PanelLeftOpen, ReceiptText, WalletCards } from 'lucide-react'
+import {
+  CalendarDays,
+  Home,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ReceiptText,
+  WalletCards,
+} from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 
@@ -20,6 +27,7 @@ const navItems = [
   { to: '/', label: 'Inicio', end: true, icon: Home },
   { to: '/gastos', label: 'Gastos', end: false, icon: ReceiptText },
   { to: '/ingresos', label: 'Ingresos', end: false, icon: WalletCards },
+  { to: '/calendario', label: 'Calendario', end: false, icon: CalendarDays },
 ]
 
 export function AppLayout() {
