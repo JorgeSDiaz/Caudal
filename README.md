@@ -8,14 +8,15 @@ Personal-finance app for tracking where your money goes **and** where it comes f
 - **Expenses & incomes** — opinionated fixed expense categories and income sources (Sueldo, Freelance, Cashback…), tuned for Colombia (COP).
 - **Financial periods** — reports and lists use a personal cycle from the 30th to the 30th instead of calendar months.
 - **Monthly reports** — expense, income, net balance, breakdowns, and month-over-month comparison.
-- **Recurring movements** — create fixed expenses or incomes and materialize due occurrences into real movements.
+- **Recurring movements** — create fixed expenses or incomes, link generated movements back to their recurrence, and edit cadence from the movement form.
+- **Calendar view** — visualize projected recurring incomes and expenses by calendar month with color markers.
 - **Bento dashboard** — compact sidebar navigation with capture, analysis, recurrentes, and movement lists arranged for daily use.
 - **Backup** — export/import all expenses and incomes as a single JSON document.
 
 ## Stack
 
 - **Backend** — Go 1.26 · net/http · GORM · PostgreSQL · goose · slog · testify
-- **Frontend** — React 19 · TypeScript · Vite · React Router · Tailwind CSS · shadcn/ui · SWR
+- **Frontend** — React 19 · TypeScript · Vite · React Router · Tailwind CSS · shadcn/ui · SWR · DayPicker
 - **Contract** — OpenAPI YAML → generated typed TS client (`src/api/schema.d.ts`)
 - **Tooling** — Go toolchain · pnpm workspaces · Docker
 
