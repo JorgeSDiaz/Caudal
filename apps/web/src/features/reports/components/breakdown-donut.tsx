@@ -2,21 +2,47 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
 
 import { formatMinorUnits } from '@/shared/money'
 
-const CHART_COLORS = [
-  'var(--color-chart-1)',
-  'var(--color-chart-2)',
-  'var(--color-chart-3)',
-  'var(--color-chart-4)',
-  'var(--color-chart-5)',
-]
+const PALETTES = {
+  neutral: [
+    'var(--color-chart-1)',
+    'var(--color-chart-2)',
+    'var(--color-chart-3)',
+    'var(--color-chart-4)',
+    'var(--color-chart-5)',
+  ],
+  warm: [
+    'var(--color-chart-warm-1)',
+    'var(--color-chart-warm-2)',
+    'var(--color-chart-warm-3)',
+    'var(--color-chart-warm-4)',
+    'var(--color-chart-warm-5)',
+  ],
+  cool: [
+    'var(--color-chart-cool-1)',
+    'var(--color-chart-cool-2)',
+    'var(--color-chart-cool-3)',
+    'var(--color-chart-cool-4)',
+    'var(--color-chart-cool-5)',
+  ],
+} as const
 
 export type DonutSlice = { id: number; label: string; value: number }
+export type DonutPalette = keyof typeof PALETTES
 
 /** Presentational donut + legend. Callers map their breakdown into slices. */
-export function BreakdownDonut({ slices, total }: { slices: DonutSlice[]; total: number }) {
+export function BreakdownDonut({
+  slices,
+  total,
+  palette = 'neutral',
+}: {
+  slices: DonutSlice[]
+  total: number
+  palette?: DonutPalette
+}) {
+  const colors = PALETTES[palette]
   const colored = slices.map((slice, index) => ({
     ...slice,
-    color: CHART_COLORS[index % CHART_COLORS.length],
+    color: colors[index % colors.length],
   }))
 
   return (

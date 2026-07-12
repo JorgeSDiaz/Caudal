@@ -17,5 +17,5 @@ export function SourceBreakdown({ month }: { month: string }) {
     value: item.total_cents,
   }))
 
-  return <BreakdownDonut slices={slices} total={report.income_total_cents} />
+  return <BreakdownDonut slices={slices} total={report.income_total_cents} palette="cool" />
 }

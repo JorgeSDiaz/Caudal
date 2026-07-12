@@ -17,5 +17,5 @@ export function CategoryBreakdown({ month }: { month: string }) {
     value: item.total_cents,
   }))
 
-  return <BreakdownDonut slices={slices} total={report.expense_total_cents} />
+  return <BreakdownDonut slices={slices} total={report.expense_total_cents} palette="warm" />
 }

@@ -30,6 +30,18 @@
   --chart-3: oklch(0.72 0.12 155);
   --chart-4: oklch(0.8 0.13 95);
   --chart-5: oklch(0.68 0.15 45);
+  /* Warm ramp for expenses (outflow): amber → orange → red. */
+  --chart-warm-1: oklch(0.78 0.14 75);
+  --chart-warm-2: oklch(0.72 0.16 55);
+  --chart-warm-3: oklch(0.66 0.18 40);
+  --chart-warm-4: oklch(0.6 0.19 25);
+  --chart-warm-5: oklch(0.52 0.17 15);
+  /* Cool ramp for income (inflow): sky → teal → indigo. */
+  --chart-cool-1: oklch(0.78 0.09 220);
+  --chart-cool-2: oklch(0.68 0.11 215);
+  --chart-cool-3: oklch(0.6 0.11 235);
+  --chart-cool-4: oklch(0.66 0.1 195);
+  --chart-cool-5: oklch(0.5 0.12 260);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -64,6 +76,16 @@
   --chart-3: oklch(0.74 0.13 150);
   --chart-4: oklch(0.8 0.13 95);
   --chart-5: oklch(0.7 0.16 45);
+  --chart-warm-1: oklch(0.82 0.12 75);
+  --chart-warm-2: oklch(0.76 0.15 55);
+  --chart-warm-3: oklch(0.7 0.18 40);
+  --chart-warm-4: oklch(0.64 0.19 25);
+  --chart-warm-5: oklch(0.56 0.18 15);
+  --chart-cool-1: oklch(0.82 0.08 220);
+  --chart-cool-2: oklch(0.74 0.1 215);
+  --chart-cool-3: oklch(0.68 0.11 235);
+  --chart-cool-4: oklch(0.72 0.1 195);
+  --chart-cool-5: oklch(0.6 0.13 260);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -102,6 +124,16 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-chart-warm-1: var(--chart-warm-1);
+  --color-chart-warm-2: var(--chart-warm-2);
+  --color-chart-warm-3: var(--chart-warm-3);
+  --color-chart-warm-4: var(--chart-warm-4);
+  --color-chart-warm-5: var(--chart-warm-5);
+  --color-chart-cool-1: var(--chart-cool-1);
+  --color-chart-cool-2: var(--chart-cool-2);
+  --color-chart-cool-3: var(--chart-cool-3);
+  --color-chart-cool-4: var(--chart-cool-4);
+  --color-chart-cool-5: var(--chart-cool-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
