@@ -24,6 +24,11 @@ paths:
             type: string
             enum: [expense, income]
             default: expense
+        - name: include_inactive
+          in: query
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: Successful Response
@@ -33,6 +38,30 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/CategoryResponse"
+    post:
+      operationId: create_category_api_v1_categories_post
+      requestBody:
+        $ref: "#/components/requestBodies/CreateCategory"
+      responses:
+        "201":
+          $ref: "#/components/responses/Category"
+  /api/v1/categories/{category_id}:
+    patch:
+      operationId: update_category_api_v1_categories__category_id__patch
+      parameters:
+        - $ref: "#/components/parameters/CategoryID"
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateCategory"
+      responses:
+        "200":
+          $ref: "#/components/responses/Category"
+    delete:
+      operationId: delete_category_api_v1_categories__category_id__delete
+      parameters:
+        - $ref: "#/components/parameters/CategoryID"
+      responses:
+        "204":
+          description: Successful Response
   /api/v1/expenses:
     get:
       operationId: list_expenses_api_v1_expenses_get
@@ -246,7 +275,23 @@ components:
       required: true
       schema:
         type: integer
+    CategoryID:
+      name: category_id
+      in: path
+      required: true
+      schema:
+        type: integer
   requestBodies:
+    CreateCategory:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateCategoryRequest"
+    UpdateCategory:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateCategoryRequest"
     CreateExpense:
       content:
         application/json:
@@ -268,6 +313,12 @@ components:
           schema:
             $ref: "#/components/schemas/UpdateIncomeRequest"
   responses:
+    Category:
+      description: Successful Response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CategoryResponse"
     Expense:
       description: Successful Response
       content:
@@ -301,13 +352,28 @@ components:
   schemas:
     CategoryResponse:
       type: object
-      required: [id, name, icon, sort_order, kind]
+      required: [id, name, icon, sort_order, kind, is_system, is_active]
       properties:
         id: { type: integer }
         name: { type: string }
         icon: { type: string, nullable: true }
         sort_order: { type: integer }
         kind: { type: string, enum: [expense, income] }
+        is_system: { type: boolean }
+        is_active: { type: boolean }
+    CreateCategoryRequest:
+      type: object
+      required: [name, kind, icon]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80 }
+        kind: { type: string, enum: [expense, income] }
+        icon: { type: string, nullable: true }
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 80, nullable: true }
+        icon: { type: string, nullable: true }
+        is_active: { type: boolean, nullable: true }
     CreateExpenseRequest:
       type: object
       required: [amount_cents, currency, category_id, occurred_on]
@@ -380,17 +446,19 @@ components:
         total: { type: integer }
     CategoryBreakdownResponse:
       type: object
-      required: [category_id, category_name, total_cents]
+      required: [category_id, category_name, category_icon, total_cents]
       properties:
         category_id: { type: integer }
         category_name: { type: string }
+        category_icon: { type: string, nullable: true }
         total_cents: { type: integer }
     SourceBreakdownResponse:
       type: object
-      required: [source_id, source_name, total_cents]
+      required: [source_id, source_name, source_icon, total_cents]
       properties:
         source_id: { type: integer }
         source_name: { type: string }
+        source_icon: { type: string, nullable: true }
         total_cents: { type: integer }
     MonthlyReportResponse:
       type: object

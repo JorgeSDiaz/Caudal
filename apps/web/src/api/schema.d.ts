@@ -29,11 +29,27 @@ export interface paths {
         };
         get: operations["list_categories_api_v1_categories_get"];
         put?: never;
-        post?: never;
+        post: operations["create_category_api_v1_categories_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/categories/{category_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["delete_category_api_v1_categories__category_id__delete"];
+        options?: never;
+        head?: never;
+        patch: operations["update_category_api_v1_categories__category_id__patch"];
         trace?: never;
     };
     "/api/v1/expenses": {
@@ -191,6 +207,19 @@ export interface components {
             sort_order: number;
             /** @enum {string} */
             kind: "expense" | "income";
+            is_system: boolean;
+            is_active: boolean;
+        };
+        CreateCategoryRequest: {
+            name: string;
+            /** @enum {string} */
+            kind: "expense" | "income";
+            icon: string | null;
+        };
+        UpdateCategoryRequest: {
+            name?: string | null;
+            icon?: string | null;
+            is_active?: boolean | null;
         };
         CreateExpenseRequest: {
             amount_cents: number;
@@ -245,11 +274,13 @@ export interface components {
         CategoryBreakdownResponse: {
             category_id: number;
             category_name: string;
+            category_icon: string | null;
             total_cents: number;
         };
         SourceBreakdownResponse: {
             source_id: number;
             source_name: string;
+            source_icon: string | null;
             total_cents: number;
         };
         MonthlyReportResponse: {
@@ -307,6 +338,15 @@ export interface components {
     };
     responses: {
         /** @description Successful Response */
+        Category: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["CategoryResponse"];
+            };
+        };
+        /** @description Successful Response */
         Expense: {
             headers: {
                 [name: string]: unknown;
@@ -358,8 +398,19 @@ export interface components {
         Offset: number;
         ExpenseID: number;
         IncomeID: number;
+        CategoryID: number;
     };
     requestBodies: {
+        CreateCategory: {
+            content: {
+                "application/json": components["schemas"]["CreateCategoryRequest"];
+            };
+        };
+        UpdateCategory: {
+            content: {
+                "application/json": components["schemas"]["UpdateCategoryRequest"];
+            };
+        };
         CreateExpense: {
             content: {
                 "application/json": components["schemas"]["CreateExpenseRequest"];
@@ -412,6 +463,7 @@ export interface operations {
         parameters: {
             query?: {
                 kind?: "expense" | "income";
+                include_inactive?: boolean;
             };
             header?: never;
             path?: never;
@@ -428,6 +480,52 @@ export interface operations {
                     "application/json": components["schemas"]["CategoryResponse"][];
                 };
             };
+        };
+    };
+    create_category_api_v1_categories_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: components["requestBodies"]["CreateCategory"];
+        responses: {
+            201: components["responses"]["Category"];
+        };
+    };
+    delete_category_api_v1_categories__category_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: components["parameters"]["CategoryID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    update_category_api_v1_categories__category_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category_id: components["parameters"]["CategoryID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: components["requestBodies"]["UpdateCategory"];
+        responses: {
+            200: components["responses"]["Category"];
         };
     };
     list_expenses_api_v1_expenses_get: {

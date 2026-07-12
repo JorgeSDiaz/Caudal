@@ -12,6 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import type { Category } from '@/features/categories/category'
+import { CategoryIcon } from '@/features/categories/category-icons'
 import { useCategories } from '@/features/categories/hooks/use-categories'
 import { deleteIncome } from '@/features/incomes/api/delete-income'
 import { IncomeForm } from '@/features/incomes/components/income-form'
@@ -50,7 +52,7 @@ export function IncomeList({ month }: { month: string }) {
     return <p className="text-muted-foreground text-sm">Aún no hay ingresos este mes.</p>
   }
 
-  const sourceNames = new Map(categories.map((category) => [category.id, category.name]))
+  const sourceById = new Map(categories.map((category) => [category.id, category]))
 
   return (
     <div className="space-y-3">
@@ -59,7 +61,7 @@ export function IncomeList({ month }: { month: string }) {
           <IncomeRow
             key={income.id}
             income={income}
-            sourceName={sourceNames.get(income.source_id) ?? '—'}
+            source={sourceById.get(income.source_id)}
             month={month}
           />
         ))}
@@ -81,14 +83,15 @@ export function IncomeList({ month }: { month: string }) {
 
 function IncomeRow({
   income,
-  sourceName,
+  source,
   month,
 }: {
   income: Income
-  sourceName: string
+  source?: Category
   month: string
 }) {
   const [isEditing, setIsEditing] = useState(false)
+  const sourceName = source?.name ?? '—'
 
   async function handleDelete() {
     try {
@@ -103,7 +106,10 @@ function IncomeRow({
   return (
     <li className="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
       <div className="min-w-0">
-        <p className="truncate font-medium">{sourceName}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <CategoryIcon name={source?.icon} className="text-muted-foreground shrink-0" />
+          <p className="truncate font-medium">{sourceName}</p>
+        </div>
         <p className="text-muted-foreground truncate text-sm">
           {formatDay(income.occurred_on)}
           {income.note ? ` · ${income.note}` : ''}

@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 import { mutate } from 'swr'
 
 import { Button } from '@/components/ui/button'
+import type { Category } from '@/features/categories/category'
+import { CategoryIcon } from '@/features/categories/category-icons'
 import { useCategories } from '@/features/categories/hooks/use-categories'
 import { deleteRecurrence } from '@/features/recurrences/api/delete-recurrence'
 import { describeSchedule, formatShortDay } from '@/features/recurrences/describe'
@@ -27,7 +29,7 @@ export function RecurrenceList({ kind }: { kind: RecurrenceKind }) {
     )
   }
 
-  const names = new Map(categories.map((category) => [category.id, category.name]))
+  const categoryById = new Map(categories.map((category) => [category.id, category]))
 
   return (
     <ul className="divide-border divide-y">
@@ -35,7 +37,7 @@ export function RecurrenceList({ kind }: { kind: RecurrenceKind }) {
         <RecurrenceRow
           key={recurrence.id}
           recurrence={recurrence}
-          name={names.get(recurrence.category_id) ?? '—'}
+          category={categoryById.get(recurrence.category_id)}
           kind={kind}
         />
       ))}
@@ -45,13 +47,14 @@ export function RecurrenceList({ kind }: { kind: RecurrenceKind }) {
 
 function RecurrenceRow({
   recurrence,
-  name,
+  category,
   kind,
 }: {
   recurrence: Recurrence
-  name: string
+  category?: Category
   kind: RecurrenceKind
 }) {
+  const name = category?.name ?? '—'
   async function handleDelete() {
     try {
       await deleteRecurrence(recurrence.id)
@@ -65,7 +68,10 @@ function RecurrenceRow({
   return (
     <li className="flex items-center justify-between gap-3 py-2.5">
       <div className="min-w-0">
-        <p className="truncate font-medium">{name}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <CategoryIcon name={category?.icon} className="text-muted-foreground shrink-0" />
+          <p className="truncate font-medium">{name}</p>
+        </div>
         <p className="text-muted-foreground truncate text-sm">
           {describeSchedule(recurrence)}
           {recurrence.next_occurrence_on

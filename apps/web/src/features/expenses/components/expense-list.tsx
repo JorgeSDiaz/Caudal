@@ -12,6 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import type { Category } from '@/features/categories/category'
+import { CategoryIcon } from '@/features/categories/category-icons'
 import { useCategories } from '@/features/categories/hooks/use-categories'
 import { deleteExpense } from '@/features/expenses/api/delete-expense'
 import { ExpenseForm } from '@/features/expenses/components/expense-form'
@@ -50,7 +52,7 @@ export function ExpenseList({ month }: { month: string }) {
     return <p className="text-muted-foreground text-sm">Aún no hay gastos este mes.</p>
   }
 
-  const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
+  const categoryById = new Map(categories.map((category) => [category.id, category]))
 
   return (
     <div className="space-y-3">
@@ -59,7 +61,7 @@ export function ExpenseList({ month }: { month: string }) {
           <ExpenseRow
             key={expense.id}
             expense={expense}
-            categoryName={categoryNames.get(expense.category_id) ?? '—'}
+            category={categoryById.get(expense.category_id)}
             month={month}
           />
         ))}
@@ -81,14 +83,15 @@ export function ExpenseList({ month }: { month: string }) {
 
 function ExpenseRow({
   expense,
-  categoryName,
+  category,
   month,
 }: {
   expense: Expense
-  categoryName: string
+  category?: Category
   month: string
 }) {
   const [isEditing, setIsEditing] = useState(false)
+  const categoryName = category?.name ?? '—'
 
   async function handleDelete() {
     try {
@@ -103,7 +106,10 @@ function ExpenseRow({
   return (
     <li className="grid gap-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
       <div className="min-w-0">
-        <p className="truncate font-medium">{categoryName}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <CategoryIcon name={category?.icon} className="text-muted-foreground shrink-0" />
+          <p className="truncate font-medium">{categoryName}</p>
+        </div>
         <p className="text-muted-foreground truncate text-sm">
           {formatDay(expense.occurred_on)}
           {expense.note ? ` · ${expense.note}` : ''}

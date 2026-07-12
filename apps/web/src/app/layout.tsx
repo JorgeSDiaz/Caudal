@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   Home,
+  Tags,
   PanelLeftClose,
   PanelLeftOpen,
   ReceiptText,
@@ -28,11 +29,12 @@ const navItems = [
   { to: '/gastos', label: 'Gastos', end: false, icon: ReceiptText },
   { to: '/ingresos', label: 'Ingresos', end: false, icon: WalletCards },
   { to: '/calendario', label: 'Calendario', end: false, icon: CalendarDays },
+  { to: '/categorias', label: 'Categorías', end: false, icon: Tags },
 ]
 
 export function AppLayout() {
   const month = currentMonth()
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   useRunDueRecurrences()
 
   return (

@@ -5,14 +5,7 @@ import { mutate } from 'swr'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useCategories } from '@/features/categories/hooks/use-categories'
+import { CategorySelect } from '@/features/categories/components/category-select'
 import { createIncome } from '@/features/incomes/api/create-income'
 import { updateIncome } from '@/features/incomes/api/update-income'
 import type { Income } from '@/features/incomes/income'
@@ -44,7 +37,6 @@ export function IncomeForm({
   onSaved?: () => void
 }) {
   const isEditing = income !== undefined
-  const { categories, isLoading } = useCategories('income')
   const { recurrences } = useRecurrences('income')
   const linkedRecurrence = recurrences.find((item) => item.id === income?.recurrence_id)
   const [amount, setAmount] = useState(() => (income ? String(income.amount_cents) : ''))
@@ -188,18 +180,7 @@ export function IncomeForm({
 
       <div className="space-y-2">
         <Label htmlFor="source">Fuente</Label>
-        <Select value={sourceId} onValueChange={setSourceId} disabled={isLoading}>
-          <SelectTrigger id="source" className="!h-11 w-full">
-            <SelectValue placeholder="Elige una fuente" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={String(category.id)}>
-                {category.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <CategorySelect id="source" kind="income" value={sourceId} onChange={setSourceId} />
       </div>
 
       <div className="space-y-2">

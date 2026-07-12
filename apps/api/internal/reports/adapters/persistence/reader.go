@@ -39,14 +39,15 @@ func (reader ExpenseReader) BreakdownForMonth(ctx context.Context, year int, mon
 	var rows []struct {
 		CategoryID   int64
 		CategoryName string
+		CategoryIcon *string
 		TotalCents   int64
 	}
 	start, end := bounds(year, month)
 	err := reader.db.WithContext(ctx).Table("category").
-		Select("category.id AS category_id, category.name AS category_name, coalesce(sum(expense.amount_cents), 0) AS total_cents").
+		Select("category.id AS category_id, category.name AS category_name, category.icon AS category_icon, coalesce(sum(expense.amount_cents), 0) AS total_cents").
 		Joins("JOIN expense ON expense.category_id = category.id").
 		Where("expense.deleted_at IS NULL AND expense.occurred_on >= ? AND expense.occurred_on < ?", start, end).
-		Group("category.id, category.name").Order("total_cents DESC").Scan(&rows).Error
+		Group("category.id, category.name, category.icon").Order("total_cents DESC").Scan(&rows).Error
 	return categoryRows(rows), err
 }
 
@@ -64,14 +65,15 @@ func (reader IncomeReader) BreakdownForMonth(ctx context.Context, year int, mont
 	var rows []struct {
 		SourceID   int64
 		SourceName string
+		SourceIcon *string
 		TotalCents int64
 	}
 	start, end := bounds(year, month)
 	err := reader.db.WithContext(ctx).Table("category").
-		Select("category.id AS source_id, category.name AS source_name, coalesce(sum(income.amount_cents), 0) AS total_cents").
+		Select("category.id AS source_id, category.name AS source_name, category.icon AS source_icon, coalesce(sum(income.amount_cents), 0) AS total_cents").
 		Joins("JOIN income ON income.source_id = category.id").
 		Where("income.deleted_at IS NULL AND income.occurred_on >= ? AND income.occurred_on < ?", start, end).
-		Group("category.id, category.name").Order("total_cents DESC").Scan(&rows).Error
+		Group("category.id, category.name, category.icon").Order("total_cents DESC").Scan(&rows).Error
 	return sourceRows(rows), err
 }
 
@@ -82,6 +84,7 @@ func bounds(year int, month int) (time.Time, time.Time) {
 func categoryRows(rows []struct {
 	CategoryID   int64
 	CategoryName string
+	CategoryIcon *string
 	TotalCents   int64
 }) []domain.CategoryBreakdown {
 	items := make([]domain.CategoryBreakdown, 0, len(rows))
@@ -94,6 +97,7 @@ func categoryRows(rows []struct {
 func sourceRows(rows []struct {
 	SourceID   int64
 	SourceName string
+	SourceIcon *string
 	TotalCents int64
 }) []domain.SourceBreakdown {
 	items := make([]domain.SourceBreakdown, 0, len(rows))

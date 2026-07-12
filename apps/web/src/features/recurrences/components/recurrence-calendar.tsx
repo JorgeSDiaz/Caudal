@@ -4,6 +4,8 @@ import { DayButton, type DayButtonProps } from 'react-day-picker'
 import { es } from 'react-day-picker/locale'
 
 import { Calendar } from '@/components/ui/calendar'
+import type { Category } from '@/features/categories/category'
+import { CategoryIcon } from '@/features/categories/category-icons'
 import { useCategories } from '@/features/categories/hooks/use-categories'
 import { describeSchedule } from '@/features/recurrences/describe'
 import { useRecurrences } from '@/features/recurrences/hooks/use-recurrences'
@@ -16,6 +18,7 @@ type CalendarOccurrence = {
   recurrence: Recurrence
   kind: RecurrenceKind
   name: string
+  icon: string | null
 }
 
 const kindLabels: Record<RecurrenceKind, string> = {
@@ -57,7 +60,7 @@ function isAfterDay(left: Date, right: Date): boolean {
 function projectRecurrence(
   recurrence: Recurrence,
   kind: RecurrenceKind,
-  name: string,
+  category: Category | undefined,
   month: Date,
 ): CalendarOccurrence[] {
   if (!recurrence.is_active) return []
@@ -78,7 +81,13 @@ function projectRecurrence(
     ) {
       if (isBeforeDay(occurrence, monthStart)) continue
       if (endDate && isAfterDay(occurrence, endDate)) break
-      occurrences.push({ date: occurrence, recurrence, kind, name })
+      occurrences.push({
+        date: occurrence,
+        recurrence,
+        kind,
+        name: category?.name ?? (kind === 'income' ? 'Sin fuente' : 'Sin categoría'),
+        icon: category?.icon ?? null,
+      })
     }
     return occurrences
   }
@@ -86,7 +95,13 @@ function projectRecurrence(
   const occurrence = new Date(year, monthIndex, Math.min(recurrence.day_of_month, monthEnd.getDate()))
   if (isBeforeDay(occurrence, startDate)) return []
   if (endDate && isAfterDay(occurrence, endDate)) return []
-  return [{ date: occurrence, recurrence, kind, name }]
+  return [{
+    date: occurrence,
+    recurrence,
+    kind,
+    name: category?.name ?? (kind === 'income' ? 'Sin fuente' : 'Sin categoría'),
+    icon: category?.icon ?? null,
+  }]
 }
 
 function occurrenceSummary(occurrences: CalendarOccurrence[]) {
@@ -105,12 +120,12 @@ export function RecurrenceCalendar() {
   const { categories: expenseCategories } = useCategories('expense')
   const { categories: incomeCategories } = useCategories('income')
 
-  const expenseNames = useMemo(
-    () => new Map(expenseCategories.map((category) => [category.id, category.name])),
+  const expenseById = useMemo(
+    () => new Map(expenseCategories.map((category) => [category.id, category])),
     [expenseCategories],
   )
-  const incomeNames = useMemo(
-    () => new Map(incomeCategories.map((category) => [category.id, category.name])),
+  const incomeById = useMemo(
+    () => new Map(incomeCategories.map((category) => [category.id, category])),
     [incomeCategories],
   )
 
@@ -120,7 +135,7 @@ export function RecurrenceCalendar() {
         projectRecurrence(
           recurrence,
           'expense',
-          expenseNames.get(recurrence.category_id) ?? 'Sin categoría',
+          expenseById.get(recurrence.category_id),
           month,
         ),
       ),
@@ -128,12 +143,12 @@ export function RecurrenceCalendar() {
         projectRecurrence(
           recurrence,
           'income',
-          incomeNames.get(recurrence.category_id) ?? 'Sin fuente',
+          incomeById.get(recurrence.category_id),
           month,
         ),
       ),
     ],
-    [expenseNames, expenses, incomeNames, incomes, month],
+    [expenseById, expenses, incomeById, incomes, month],
   )
 
   const occurrencesByDate = useMemo(() => {
@@ -236,10 +251,13 @@ export function RecurrenceCalendar() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span
+                      <CategoryIcon
+                        name={occurrence.icon}
                         className={cn(
-                          'size-2 rounded-full',
-                          occurrence.kind === 'income' ? 'bg-emerald-500' : 'bg-red-500',
+                          'shrink-0',
+                          occurrence.kind === 'income'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-red-600 dark:text-red-400',
                         )}
                       />
                       <p className="truncate font-medium">{occurrence.name}</p>

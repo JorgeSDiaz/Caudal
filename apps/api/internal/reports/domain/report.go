@@ -3,12 +3,14 @@ package domain
 type CategoryBreakdown struct {
 	CategoryID   int64
 	CategoryName string
+	CategoryIcon *string
 	TotalCents   int64
 }
 
 type SourceBreakdown struct {
 	SourceID   int64
 	SourceName string
+	SourceIcon *string
 	TotalCents int64
 }
 

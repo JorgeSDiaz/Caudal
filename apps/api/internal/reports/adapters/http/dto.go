@@ -3,15 +3,17 @@ package http
 import "caudal-api/internal/reports/domain"
 
 type CategoryBreakdownResponse struct {
-	CategoryID   int64  `json:"category_id"`
-	CategoryName string `json:"category_name"`
-	TotalCents   int64  `json:"total_cents"`
+	CategoryID   int64   `json:"category_id"`
+	CategoryName string  `json:"category_name"`
+	CategoryIcon *string `json:"category_icon"`
+	TotalCents   int64   `json:"total_cents"`
 }
 
 type SourceBreakdownResponse struct {
-	SourceID   int64  `json:"source_id"`
-	SourceName string `json:"source_name"`
-	TotalCents int64  `json:"total_cents"`
+	SourceID   int64   `json:"source_id"`
+	SourceName string  `json:"source_name"`
+	SourceIcon *string `json:"source_icon"`
+	TotalCents int64   `json:"total_cents"`
 }
 
 type MonthlyReportResponse struct {
@@ -30,7 +32,7 @@ func categoryResponses(items []domain.CategoryBreakdown) []CategoryBreakdownResp
 	response := make([]CategoryBreakdownResponse, 0, len(items))
 	for _, item := range items {
 		response = append(response, CategoryBreakdownResponse{
-			CategoryID: item.CategoryID, CategoryName: item.CategoryName, TotalCents: item.TotalCents,
+			CategoryID: item.CategoryID, CategoryName: item.CategoryName, CategoryIcon: item.CategoryIcon, TotalCents: item.TotalCents,
 		})
 	}
 	return response
@@ -40,7 +42,7 @@ func sourceResponses(items []domain.SourceBreakdown) []SourceBreakdownResponse {
 	response := make([]SourceBreakdownResponse, 0, len(items))
 	for _, item := range items {
 		response = append(response, SourceBreakdownResponse{
-			SourceID: item.SourceID, SourceName: item.SourceName, TotalCents: item.TotalCents,
+			SourceID: item.SourceID, SourceName: item.SourceName, SourceIcon: item.SourceIcon, TotalCents: item.TotalCents,
 		})
 	}
 	return response

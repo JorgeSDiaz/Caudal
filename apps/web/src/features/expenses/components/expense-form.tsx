@@ -5,14 +5,7 @@ import { mutate } from 'swr'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useCategories } from '@/features/categories/hooks/use-categories'
+import { CategorySelect } from '@/features/categories/components/category-select'
 import { createExpense } from '@/features/expenses/api/create-expense'
 import { updateExpense } from '@/features/expenses/api/update-expense'
 import type { Expense } from '@/features/expenses/expense'
@@ -44,7 +37,6 @@ export function ExpenseForm({
   onSaved?: () => void
 }) {
   const isEditing = expense !== undefined
-  const { categories, isLoading } = useCategories()
   const { recurrences } = useRecurrences('expense')
   const linkedRecurrence = recurrences.find((item) => item.id === expense?.recurrence_id)
   const [amount, setAmount] = useState(() => (expense ? String(expense.amount_cents) : ''))
@@ -190,18 +182,7 @@ export function ExpenseForm({
 
       <div className="space-y-2">
         <Label htmlFor="category">Categoría</Label>
-        <Select value={categoryId} onValueChange={setCategoryId} disabled={isLoading}>
-          <SelectTrigger id="category" className="!h-11 w-full">
-            <SelectValue placeholder="Elige una categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={String(category.id)}>
-                {category.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <CategorySelect id="category" kind="expense" value={categoryId} onChange={setCategoryId} />
       </div>
 
       <div className="space-y-2">

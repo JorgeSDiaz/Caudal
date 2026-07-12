@@ -71,7 +71,12 @@ type incomeWiring struct {
 
 func wireCategories(db *gorm.DB) categoryhttp.Router {
 	repository := categorydb.NewRepository(db)
-	return categoryhttp.NewRouter(categoryapp.NewListCategories(repository))
+	return categoryhttp.NewRouter(
+		categoryapp.NewCreateCategory(repository),
+		categoryapp.NewListCategories(repository),
+		categoryapp.NewUpdateCategory(repository),
+		categoryapp.NewDeleteCategory(repository),
+	)
 }
 
 func wireExpenses(db *gorm.DB) expenseWiring {

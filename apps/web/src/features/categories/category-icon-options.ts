@@ -1,0 +1,28 @@
+export const categoryIconOptions = [
+  { value: 'Utensils', label: 'Comida' },
+  { value: 'Bus', label: 'Transporte' },
+  { value: 'ShoppingCart', label: 'Compras' },
+  { value: 'Gamepad2', label: 'Ocio' },
+  { value: 'HeartPulse', label: 'Salud' },
+  { value: 'Home', label: 'Hogar' },
+  { value: 'CreditCard', label: 'Tarjetas' },
+  { value: 'Receipt', label: 'Recibos' },
+  { value: 'PiggyBank', label: 'Ahorro' },
+  { value: 'Wallet', label: 'Sueldo' },
+  { value: 'Laptop', label: 'Trabajo digital' },
+  { value: 'Briefcase', label: 'Trabajo' },
+  { value: 'DollarSign', label: 'Dinero' },
+  { value: 'Repeat', label: 'Recurrente' },
+  { value: 'Gift', label: 'Regalos' },
+  { value: 'TrendingUp', label: 'Inversión' },
+  { value: 'Banknote', label: 'Efectivo' },
+  { value: 'Landmark', label: 'Banco' },
+  { value: 'Car', label: 'Carro' },
+  { value: 'Plane', label: 'Viajes' },
+  { value: 'Dumbbell', label: 'Deporte' },
+  { value: 'GraduationCap', label: 'Educación' },
+  { value: 'Shirt', label: 'Ropa' },
+  { value: 'HelpCircle', label: 'Otros' },
+] as const
+
+export type CategoryIconName = (typeof categoryIconOptions)[number]['value']

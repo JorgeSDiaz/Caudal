@@ -8,6 +8,14 @@ type CategoryResponse struct {
 	Icon      *string     `json:"icon"`
 	SortOrder int         `json:"sort_order"`
 	Kind      domain.Kind `json:"kind"`
+	IsSystem  bool        `json:"is_system"`
+	IsActive  bool        `json:"is_active"`
+}
+
+type CategoryRequest struct {
+	Name string      `json:"name"`
+	Icon *string     `json:"icon"`
+	Kind domain.Kind `json:"kind"`
 }
 
 func categoryResponse(category domain.Category) CategoryResponse {
@@ -17,6 +25,8 @@ func categoryResponse(category domain.Category) CategoryResponse {
 		Icon:      category.Icon,
 		SortOrder: category.SortOrder,
 		Kind:      category.Kind,
+		IsSystem:  category.IsSystem,
+		IsActive:  category.IsActive,
 	}
 }
 

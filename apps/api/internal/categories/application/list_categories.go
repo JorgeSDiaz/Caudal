@@ -15,6 +15,11 @@ func NewListCategories(repository ports.Repository) ListCategories {
 	return ListCategories{repository: repository}
 }
 
-func (useCase ListCategories) Execute(ctx context.Context, kind domain.Kind) ([]domain.Category, error) {
-	return useCase.repository.List(ctx, kind)
+type ListCategoriesQuery struct {
+	Kind            domain.Kind
+	IncludeInactive bool
+}
+
+func (useCase ListCategories) Execute(ctx context.Context, query ListCategoriesQuery) ([]domain.Category, error) {
+	return useCase.repository.List(ctx, query.Kind, query.IncludeInactive)
 }
