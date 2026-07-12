@@ -10,15 +10,28 @@ import (
 )
 
 func TestDueOccurrencesIsBoundedByLastGenerated(t *testing.T) {
-	secondDay := 30
 	lastGenerated := date(2026, time.January, 15)
-	recurrence := recurrence(t, domain.Biweekly, 15, &secondDay)
+	recurrence := recurrence(t, domain.Biweekly, 15, nil)
+	recurrence.StartDate = date(2026, time.January, 15)
 	recurrence.LastGeneratedOn = &lastGenerated
 
 	occurrences := domain.DueOccurrences(recurrence, date(2026, time.February, 1))
 
 	require.Equal(t, []time.Time{
 		date(2026, time.January, 30),
+	}, occurrences)
+}
+
+func TestBiweeklyOccurrencesAdvanceEveryFifteenDays(t *testing.T) {
+	recurrence := recurrence(t, domain.Biweekly, 30, nil)
+	recurrence.StartDate = date(2026, time.January, 30)
+
+	occurrences := domain.DueOccurrences(recurrence, date(2026, time.March, 2))
+
+	require.Equal(t, []time.Time{
+		date(2026, time.January, 30),
+		date(2026, time.February, 14),
+		date(2026, time.March, 1),
 	}, occurrences)
 }
 

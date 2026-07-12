@@ -16,16 +16,17 @@ func NewMovementWriter(db *gorm.DB) MovementWriter {
 	return MovementWriter{db: db}
 }
 
-func (writer MovementWriter) Create(ctx context.Context, kind domain.Kind, amountCents int64, currency string, categoryID int64, occurredOn time.Time, note *string) error {
+func (writer MovementWriter) Create(ctx context.Context, recurrence domain.Recurrence, occurredOn time.Time) error {
 	table, categoryColumn := "expense", "category_id"
-	if kind == domain.IncomeKind {
+	if recurrence.Kind == domain.IncomeKind {
 		table, categoryColumn = "income", "source_id"
 	}
 	return writer.db.WithContext(ctx).Table(table).Create(map[string]any{
-		"amount_cents": amountCents,
-		"currency":     currency,
-		categoryColumn: categoryID,
-		"occurred_on":  occurredOn,
-		"note":         note,
+		"amount_cents":  recurrence.Money.AmountCents,
+		"currency":      recurrence.Money.Currency,
+		categoryColumn:  recurrence.CategoryID,
+		"occurred_on":   occurredOn,
+		"note":          recurrence.Note,
+		"recurrence_id": recurrence.ID,
 	}).Error
 }

@@ -29,7 +29,9 @@ func (useCase CreateIncome) Execute(ctx context.Context, command CreateIncomeCom
 	if err != nil {
 		return domain.Income{}, err
 	}
-	income, err := domain.NewIncome(0, money, command.SourceID, command.OccurredOn, command.Note)
+	income, err := domain.NewIncome(
+		0, money, command.SourceID, command.OccurredOn, command.Note, command.RecurrenceID,
+	)
 	if err != nil {
 		return domain.Income{}, err
 	}

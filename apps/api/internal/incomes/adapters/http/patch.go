@@ -37,6 +37,23 @@ func setNullableString(raw map[string]json.RawMessage, key string, target ***str
 	return nil
 }
 
+func setNullableInt64(raw map[string]json.RawMessage, key string, target ***int64) error {
+	value, ok := raw[key]
+	if !ok {
+		return nil
+	}
+	var parsed *int64
+	if string(value) != "null" {
+		var number int64
+		if err := json.Unmarshal(value, &number); err != nil {
+			return err
+		}
+		parsed = &number
+	}
+	*target = &parsed
+	return nil
+}
+
 func decodeOptional(raw map[string]json.RawMessage, key string, target any) bool {
 	value, ok := raw[key]
 	if !ok {

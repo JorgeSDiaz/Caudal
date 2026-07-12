@@ -4,9 +4,8 @@ const dayFormatter = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: '
 
 /** Human description of a recurrence's schedule, e.g. "Mensual · día 15". */
 export function describeSchedule(recurrence: Recurrence): string {
-  if (recurrence.frequency === 'biweekly' && recurrence.second_day_of_month !== null) {
-    const [a, b] = [recurrence.day_of_month, recurrence.second_day_of_month].sort((x, y) => x - y)
-    return `Quincenal · días ${a} y ${b}`
+  if (recurrence.frequency === 'biweekly') {
+    return `Quincenal · cada 15 días desde ${formatShortDay(recurrence.start_date)}`
   }
   return `Mensual · día ${recurrence.day_of_month}`
 }

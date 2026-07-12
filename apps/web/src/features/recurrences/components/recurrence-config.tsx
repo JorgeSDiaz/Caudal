@@ -9,35 +9,6 @@ const frequencies: { value: Frequency; label: string }[] = [
   { value: 'biweekly', label: 'Quincenal' },
 ]
 
-function clampDay(raw: string): number {
-  const day = Number(raw.replace(/\D/g, ''))
-  if (day < 1) return 1
-  if (day > 31) return 31
-  return day
-}
-
-function DayInput({
-  label,
-  value,
-  onChange,
-}: {
-  label: string
-  value: number
-  onChange: (day: number) => void
-}) {
-  return (
-    <div className="flex-1 space-y-1">
-      <Label className="text-xs">{label}</Label>
-      <Input
-        inputMode="numeric"
-        value={String(value)}
-        onChange={(event) => onChange(clampDay(event.target.value))}
-        className="h-9"
-      />
-    </div>
-  )
-}
-
 export function RecurrenceConfig({
   value,
   onChange,
@@ -77,21 +48,6 @@ export function RecurrenceConfig({
                 {option.label}
               </button>
             ))}
-          </div>
-
-          <div className="flex gap-2">
-            <DayInput
-              label={value.frequency === 'biweekly' ? 'Primer día' : 'Día del mes'}
-              value={value.dayOfMonth}
-              onChange={(day) => set({ dayOfMonth: day })}
-            />
-            {value.frequency === 'biweekly' && (
-              <DayInput
-                label="Segundo día"
-                value={value.secondDayOfMonth}
-                onChange={(day) => set({ secondDayOfMonth: day })}
-              />
-            )}
           </div>
 
           <div className="space-y-1">

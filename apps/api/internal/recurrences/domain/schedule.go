@@ -9,6 +9,9 @@ func DueOccurrences(recurrence Recurrence, today time.Time) []time.Time {
 	if !recurrence.IsActive {
 		return nil
 	}
+	if recurrence.Frequency == Biweekly {
+		return dueBiweeklyOccurrences(recurrence, today)
+	}
 	var occurrences []time.Time
 	year, month := recurrence.StartDate.Year(), recurrence.StartDate.Month()
 	for year < today.Year() || year == today.Year() && month <= today.Month() {
@@ -35,6 +38,9 @@ func NextOccurrence(recurrence Recurrence, today time.Time) *time.Time {
 	if !recurrence.IsActive {
 		return nil
 	}
+	if recurrence.Frequency == Biweekly {
+		return nextBiweeklyOccurrence(recurrence, today)
+	}
 	year, month := today.Year(), today.Month()
 	for range 24 {
 		for _, day := range recurrence.Days() {
@@ -50,6 +56,31 @@ func NextOccurrence(recurrence Recurrence, today time.Time) *time.Time {
 		year, month = nextMonth(year, month)
 	}
 	return nil
+}
+
+func dueBiweeklyOccurrences(recurrence Recurrence, today time.Time) []time.Time {
+	var occurrences []time.Time
+	for occurrence := recurrence.StartDate; !afterDate(occurrence, today); occurrence = occurrence.AddDate(0, 0, 15) {
+		if recurrence.EndDate != nil && afterDate(occurrence, *recurrence.EndDate) {
+			break
+		}
+		if recurrence.LastGeneratedOn != nil && !afterDate(occurrence, *recurrence.LastGeneratedOn) {
+			continue
+		}
+		occurrences = append(occurrences, occurrence)
+	}
+	return occurrences
+}
+
+func nextBiweeklyOccurrence(recurrence Recurrence, today time.Time) *time.Time {
+	for occurrence := recurrence.StartDate; ; occurrence = occurrence.AddDate(0, 0, 15) {
+		if recurrence.EndDate != nil && afterDate(occurrence, *recurrence.EndDate) {
+			return nil
+		}
+		if afterDate(occurrence, today) {
+			return &occurrence
+		}
+	}
 }
 
 func clampDay(year int, month time.Month, day int) time.Time {

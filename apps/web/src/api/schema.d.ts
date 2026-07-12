@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["health_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_categories_api_v1_categories_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/expenses": {
         parameters: {
             query?: never;
@@ -11,10 +43,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Expenses */
         get: operations["list_expenses_api_v1_expenses_get"];
         put?: never;
-        /** Create Expense */
         post: operations["create_expense_api_v1_expenses_post"];
         delete?: never;
         options?: never;
@@ -32,11 +62,9 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete Expense */
         delete: operations["delete_expense_api_v1_expenses__expense_id__delete"];
         options?: never;
         head?: never;
-        /** Update Expense */
         patch: operations["update_expense_api_v1_expenses__expense_id__patch"];
         trace?: never;
     };
@@ -47,10 +75,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Incomes */
         get: operations["list_incomes_api_v1_incomes_get"];
         put?: never;
-        /** Create Income */
         post: operations["create_income_api_v1_incomes_post"];
         delete?: never;
         options?: never;
@@ -68,12 +94,26 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete Income */
         delete: operations["delete_income_api_v1_incomes__income_id__delete"];
         options?: never;
         head?: never;
-        /** Update Income */
         patch: operations["update_income_api_v1_incomes__income_id__patch"];
+        trace?: never;
+    };
+    "/api/v1/reports/monthly": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["monthly_report_api_v1_reports_monthly_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/recurrences": {
@@ -83,10 +123,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Recurrences */
         get: operations["list_recurrences_api_v1_recurrences_get"];
         put?: never;
-        /** Create Recurrence */
         post: operations["create_recurrence_api_v1_recurrences_post"];
         delete?: never;
         options?: never;
@@ -104,11 +142,9 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete Recurrence */
         delete: operations["delete_recurrence_api_v1_recurrences__recurrence_id__delete"];
         options?: never;
         head?: never;
-        /** Update Recurrence */
         patch: operations["update_recurrence_api_v1_recurrences__recurrence_id__patch"];
         trace?: never;
     };
@@ -121,42 +157,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Run Recurrences */
         post: operations["run_recurrences_api_v1_recurrences_run_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/categories": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Categories */
-        get: operations["list_categories_api_v1_categories_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/reports/monthly": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Monthly Report */
-        get: operations["monthly_report_api_v1_reports_monthly_get"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -170,28 +171,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Export Backup */
         get: operations["export_backup_api_v1_backup_get"];
         put?: never;
-        /** Import Backup */
         post: operations["import_backup_api_v1_backup_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Health */
-        get: operations["health_health_get"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -202,325 +184,234 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /**
-         * BackupDocument
-         * @description Symmetric backup payload: GET /backup returns it, POST /backup accepts it.
-         *
-         *     `incomes` defaults to empty so backups taken before incomes existed still import.
-         */
-        BackupDocument: {
-            /** Expenses */
-            expenses: components["schemas"]["CreateExpenseRequest"][];
-            /** Incomes */
-            incomes?: components["schemas"]["CreateIncomeRequest"][];
+        CategoryResponse: {
+            id: number;
+            name: string;
+            icon: string | null;
+            sort_order: number;
+            /** @enum {string} */
+            kind: "expense" | "income";
         };
-        /** CategoryBreakdownResponse */
-        CategoryBreakdownResponse: {
-            /** Category Id */
+        CreateExpenseRequest: {
+            amount_cents: number;
+            currency: string;
             category_id: number;
-            /** Category Name */
+            /** Format: date */
+            occurred_on: string;
+            note?: string | null;
+        };
+        UpdateExpenseRequest: {
+            amount_cents?: number | null;
+            currency?: string | null;
+            category_id?: number | null;
+            /** Format: date */
+            occurred_on?: string | null;
+            note?: string | null;
+            recurrence_id?: number | null;
+        };
+        ExpenseResponse: components["schemas"]["CreateExpenseRequest"] & {
+            id: number;
+            recurrence_id: number | null;
+        };
+        ExpensePageResponse: {
+            items: components["schemas"]["ExpenseResponse"][];
+            total: number;
+        };
+        CreateIncomeRequest: {
+            amount_cents: number;
+            currency: string;
+            source_id: number;
+            /** Format: date */
+            occurred_on: string;
+            note?: string | null;
+        };
+        UpdateIncomeRequest: {
+            amount_cents?: number | null;
+            currency?: string | null;
+            source_id?: number | null;
+            /** Format: date */
+            occurred_on?: string | null;
+            note?: string | null;
+            recurrence_id?: number | null;
+        };
+        IncomeResponse: components["schemas"]["CreateIncomeRequest"] & {
+            id: number;
+            recurrence_id: number | null;
+        };
+        IncomePageResponse: {
+            items: components["schemas"]["IncomeResponse"][];
+            total: number;
+        };
+        CategoryBreakdownResponse: {
+            category_id: number;
             category_name: string;
-            /** Total Cents */
             total_cents: number;
         };
-        /** CategoryResponse */
-        CategoryResponse: {
-            /** Id */
-            id: number;
-            /** Name */
-            name: string;
-            /** Icon */
-            icon: string | null;
-            /** Sort Order */
-            sort_order: number;
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "expense" | "income";
-        };
-        /** CreateExpenseRequest */
-        CreateExpenseRequest: {
-            /** Amount Cents */
-            amount_cents: number;
-            /** Currency */
-            currency: string;
-            /** Category Id */
-            category_id: number;
-            /**
-             * Occurred On
-             * Format: date
-             */
-            occurred_on: string;
-            /** Note */
-            note?: string | null;
-        };
-        /** CreateIncomeRequest */
-        CreateIncomeRequest: {
-            /** Amount Cents */
-            amount_cents: number;
-            /** Currency */
-            currency: string;
-            /** Source Id */
+        SourceBreakdownResponse: {
             source_id: number;
-            /**
-             * Occurred On
-             * Format: date
-             */
-            occurred_on: string;
-            /** Note */
-            note?: string | null;
+            source_name: string;
+            total_cents: number;
         };
-        /** CreateRecurrenceRequest */
-        CreateRecurrenceRequest: {
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "expense" | "income";
-            /** Amount Cents */
-            amount_cents: number;
-            /** Currency */
-            currency: string;
-            /** Category Id */
-            category_id: number;
-            /**
-             * Frequency
-             * @enum {string}
-             */
-            frequency: "monthly" | "biweekly";
-            /** Day Of Month */
-            day_of_month: number;
-            /**
-             * Start Date
-             * Format: date
-             */
-            start_date: string;
-            /** Second Day Of Month */
-            second_day_of_month?: number | null;
-            /** End Date */
-            end_date?: string | null;
-            /** Note */
-            note?: string | null;
-        };
-        /**
-         * ExpensePageResponse
-         * @description A page of expenses plus the full count for the month (for "load more").
-         */
-        ExpensePageResponse: {
-            /** Items */
-            items: components["schemas"]["ExpenseResponse"][];
-            /** Total */
-            total: number;
-        };
-        /** ExpenseResponse */
-        ExpenseResponse: {
-            /** Id */
-            id: number;
-            /** Amount Cents */
-            amount_cents: number;
-            /** Currency */
-            currency: string;
-            /** Category Id */
-            category_id: number;
-            /**
-             * Occurred On
-             * Format: date
-             */
-            occurred_on: string;
-            /** Note */
-            note: string | null;
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /**
-         * IncomePageResponse
-         * @description A page of incomes plus the full count for the month (for "load more").
-         */
-        IncomePageResponse: {
-            /** Items */
-            items: components["schemas"]["IncomeResponse"][];
-            /** Total */
-            total: number;
-        };
-        /** IncomeResponse */
-        IncomeResponse: {
-            /** Id */
-            id: number;
-            /** Amount Cents */
-            amount_cents: number;
-            /** Currency */
-            currency: string;
-            /** Source Id */
-            source_id: number;
-            /**
-             * Occurred On
-             * Format: date
-             */
-            occurred_on: string;
-            /** Note */
-            note: string | null;
-        };
-        /** MonthlyReportResponse */
         MonthlyReportResponse: {
-            /** Year */
             year: number;
-            /** Month */
             month: number;
-            /** Expense Total Cents */
             expense_total_cents: number;
-            /** Previous Month Expense Total Cents */
             previous_month_expense_total_cents: number;
-            /** Income Total Cents */
             income_total_cents: number;
-            /** Previous Month Income Total Cents */
             previous_month_income_total_cents: number;
-            /** Net Cents */
             net_cents: number;
-            /** By Category */
             by_category: components["schemas"]["CategoryBreakdownResponse"][];
-            /** By Source */
             by_source: components["schemas"]["SourceBreakdownResponse"][];
         };
-        /** RecurrenceResponse */
-        RecurrenceResponse: {
-            /** Id */
-            id: number;
-            /**
-             * Kind
-             * @enum {string}
-             */
+        CreateRecurrenceRequest: {
+            /** @enum {string} */
             kind: "expense" | "income";
-            /** Amount Cents */
             amount_cents: number;
-            /** Currency */
             currency: string;
-            /** Category Id */
             category_id: number;
-            /**
-             * Frequency
-             * @enum {string}
-             */
+            /** @enum {string} */
             frequency: "monthly" | "biweekly";
-            /** Day Of Month */
             day_of_month: number;
-            /** Second Day Of Month */
-            second_day_of_month: number | null;
-            /**
-             * Start Date
-             * Format: date
-             */
-            start_date: string;
-            /** End Date */
-            end_date: string | null;
-            /** Note */
-            note: string | null;
-            /** Is Active */
-            is_active: boolean;
-            /** Next Occurrence On */
-            next_occurrence_on: string | null;
-        };
-        /** SourceBreakdownResponse */
-        SourceBreakdownResponse: {
-            /** Source Id */
-            source_id: number;
-            /** Source Name */
-            source_name: string;
-            /** Total Cents */
-            total_cents: number;
-        };
-        /**
-         * UpdateExpenseRequest
-         * @description All fields optional; only the ones provided by the client are changed.
-         */
-        UpdateExpenseRequest: {
-            /** Amount Cents */
-            amount_cents?: number | null;
-            /** Currency */
-            currency?: string | null;
-            /** Category Id */
-            category_id?: number | null;
-            /** Occurred On */
-            occurred_on?: string | null;
-            /** Note */
-            note?: string | null;
-        };
-        /**
-         * UpdateIncomeRequest
-         * @description All fields optional; only the ones provided by the client are changed.
-         */
-        UpdateIncomeRequest: {
-            /** Amount Cents */
-            amount_cents?: number | null;
-            /** Currency */
-            currency?: string | null;
-            /** Source Id */
-            source_id?: number | null;
-            /** Occurred On */
-            occurred_on?: string | null;
-            /** Note */
-            note?: string | null;
-        };
-        /**
-         * UpdateRecurrenceRequest
-         * @description All fields optional; only the ones provided by the client are changed.
-         */
-        UpdateRecurrenceRequest: {
-            /** Amount Cents */
-            amount_cents?: number | null;
-            /** Currency */
-            currency?: string | null;
-            /** Category Id */
-            category_id?: number | null;
-            /** Frequency */
-            frequency?: ("monthly" | "biweekly") | null;
-            /** Day Of Month */
-            day_of_month?: number | null;
-            /** Second Day Of Month */
             second_day_of_month?: number | null;
-            /** Start Date */
-            start_date?: string | null;
-            /** End Date */
+            /** Format: date */
+            start_date: string;
+            /** Format: date */
             end_date?: string | null;
-            /** Note */
             note?: string | null;
-            /** Is Active */
+        };
+        UpdateRecurrenceRequest: {
+            amount_cents?: number | null;
+            currency?: string | null;
+            category_id?: number | null;
+            /** @enum {string|null} */
+            frequency?: "monthly" | "biweekly" | null;
+            day_of_month?: number | null;
+            second_day_of_month?: number | null;
+            /** Format: date */
+            start_date?: string | null;
+            /** Format: date */
+            end_date?: string | null;
+            note?: string | null;
             is_active?: boolean | null;
         };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-            /** Input */
-            input?: unknown;
-            /** Context */
-            ctx?: Record<string, never>;
+        RecurrenceResponse: components["schemas"]["CreateRecurrenceRequest"] & {
+            id: number;
+            is_active: boolean;
+            /** Format: date */
+            next_occurrence_on: string | null;
+        };
+        BackupDocument: {
+            expenses: components["schemas"]["CreateExpenseRequest"][];
+            incomes?: components["schemas"]["CreateIncomeRequest"][];
         };
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
+    responses: {
+        /** @description Successful Response */
+        Expense: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ExpenseResponse"];
+            };
+        };
+        /** @description Successful Response */
+        ExpensePage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ExpensePageResponse"];
+            };
+        };
+        /** @description Successful Response */
+        Income: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["IncomeResponse"];
+            };
+        };
+        /** @description Successful Response */
+        IncomePage: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["IncomePageResponse"];
+            };
+        };
+        /** @description Successful Response */
+        Backup: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["BackupDocument"];
+            };
+        };
+    };
+    parameters: {
+        Month: string;
+        Limit: number;
+        Offset: number;
+        ExpenseID: number;
+        IncomeID: number;
+    };
+    requestBodies: {
+        CreateExpense: {
+            content: {
+                "application/json": components["schemas"]["CreateExpenseRequest"];
+            };
+        };
+        UpdateExpense: {
+            content: {
+                "application/json": components["schemas"]["UpdateExpenseRequest"];
+            };
+        };
+        CreateIncome: {
+            content: {
+                "application/json": components["schemas"]["CreateIncomeRequest"];
+            };
+        };
+        UpdateIncome: {
+            content: {
+                "application/json": components["schemas"]["UpdateIncomeRequest"];
+            };
+        };
+    };
     headers: never;
     pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    list_expenses_api_v1_expenses_get: {
+    health_health_get: {
         parameters: {
-            query: {
-                /** @description Month as YYYY-MM */
-                month: string;
-                /** @description Page size */
-                limit?: number;
-                /** @description Rows to skip */
-                offset?: number;
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    list_categories_api_v1_categories_get: {
+        parameters: {
+            query?: {
+                kind?: "expense" | "income";
             };
             header?: never;
             path?: never;
@@ -534,18 +425,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ExpensePageResponse"];
+                    "application/json": components["schemas"]["CategoryResponse"][];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
+        };
+    };
+    list_expenses_api_v1_expenses_get: {
+        parameters: {
+            query: {
+                month: components["parameters"]["Month"];
+                limit?: components["parameters"]["Limit"];
+                offset?: components["parameters"]["Offset"];
             };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: components["responses"]["ExpensePage"];
         };
     };
     create_expense_api_v1_expenses_post: {
@@ -555,30 +453,9 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateExpenseRequest"];
-            };
-        };
+        requestBody?: components["requestBodies"]["CreateExpense"];
         responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExpenseResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+            201: components["responses"]["Expense"];
         };
     };
     delete_expense_api_v1_expenses__expense_id__delete: {
@@ -586,7 +463,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                expense_id: number;
+                expense_id: components["parameters"]["ExpenseID"];
             };
             cookie?: never;
         };
@@ -599,15 +476,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     update_expense_api_v1_expenses__expense_id__patch: {
@@ -615,45 +483,21 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                expense_id: number;
+                expense_id: components["parameters"]["ExpenseID"];
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateExpenseRequest"];
-            };
-        };
+        requestBody?: components["requestBodies"]["UpdateExpense"];
         responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExpenseResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+            200: components["responses"]["Expense"];
         };
     };
     list_incomes_api_v1_incomes_get: {
         parameters: {
             query: {
-                /** @description Month as YYYY-MM */
-                month: string;
-                /** @description Page size */
-                limit?: number;
-                /** @description Rows to skip */
-                offset?: number;
+                month: components["parameters"]["Month"];
+                limit?: components["parameters"]["Limit"];
+                offset?: components["parameters"]["Offset"];
             };
             header?: never;
             path?: never;
@@ -661,24 +505,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IncomePageResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+            200: components["responses"]["IncomePage"];
         };
     };
     create_income_api_v1_incomes_post: {
@@ -688,30 +515,9 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateIncomeRequest"];
-            };
-        };
+        requestBody?: components["requestBodies"]["CreateIncome"];
         responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IncomeResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
+            201: components["responses"]["Income"];
         };
     };
     delete_income_api_v1_incomes__income_id__delete: {
@@ -719,7 +525,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                income_id: number;
+                income_id: components["parameters"]["IncomeID"];
             };
             cookie?: never;
         };
@@ -732,15 +538,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     update_income_api_v1_incomes__income_id__patch: {
@@ -748,15 +545,25 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                income_id: number;
+                income_id: components["parameters"]["IncomeID"];
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateIncomeRequest"];
-            };
+        requestBody?: components["requestBodies"]["UpdateIncome"];
+        responses: {
+            200: components["responses"]["Income"];
         };
+    };
+    monthly_report_api_v1_reports_monthly_get: {
+        parameters: {
+            query: {
+                month: components["parameters"]["Month"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -764,16 +571,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["IncomeResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["MonthlyReportResponse"];
                 };
             };
         };
@@ -781,8 +579,7 @@ export interface operations {
     list_recurrences_api_v1_recurrences_get: {
         parameters: {
             query?: {
-                /** @description Filter by kind */
-                kind?: ("expense" | "income") | null;
+                kind?: "expense" | "income" | null;
             };
             header?: never;
             path?: never;
@@ -799,15 +596,6 @@ export interface operations {
                     "application/json": components["schemas"]["RecurrenceResponse"][];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     create_recurrence_api_v1_recurrences_post: {
@@ -817,7 +605,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["CreateRecurrenceRequest"];
             };
@@ -830,15 +618,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecurrenceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -861,15 +640,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
         };
     };
     update_recurrence_api_v1_recurrences__recurrence_id__patch: {
@@ -881,7 +651,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["UpdateRecurrenceRequest"];
             };
@@ -894,15 +664,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecurrenceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -929,70 +690,6 @@ export interface operations {
             };
         };
     };
-    list_categories_api_v1_categories_get: {
-        parameters: {
-            query?: {
-                /** @description Category kind: expense (default) or income */
-                kind?: "expense" | "income";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CategoryResponse"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    monthly_report_api_v1_reports_monthly_get: {
-        parameters: {
-            query: {
-                /** @description Month as YYYY-MM */
-                month: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MonthlyReportResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     export_backup_api_v1_backup_get: {
         parameters: {
             query?: never;
@@ -1002,15 +699,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BackupDocument"];
-                };
-            };
+            200: components["responses"]["Backup"];
         };
     };
     import_backup_api_v1_backup_post: {
@@ -1020,7 +709,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["BackupDocument"];
             };
@@ -1034,37 +723,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         [key: string]: number;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    health_health_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
                     };
                 };
             };

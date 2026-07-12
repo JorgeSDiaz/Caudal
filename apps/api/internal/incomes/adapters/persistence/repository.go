@@ -61,12 +61,13 @@ func (repo Repository) Update(ctx context.Context, income domain.Income) (domain
 	err := repo.db.WithContext(ctx).Model(&IncomeModel{}).
 		Where("id = ? AND deleted_at IS NULL", income.ID).
 		Updates(map[string]any{
-			"amount_cents": income.Money.AmountCents,
-			"currency":     income.Money.Currency,
-			"source_id":    income.SourceID,
-			"occurred_on":  income.OccurredOn,
-			"note":         income.Note,
-			"updated_at":   time.Now().UTC(),
+			"amount_cents":  income.Money.AmountCents,
+			"currency":      income.Money.Currency,
+			"source_id":     income.SourceID,
+			"occurred_on":   income.OccurredOn,
+			"note":          income.Note,
+			"recurrence_id": income.RecurrenceID,
+			"updated_at":    time.Now().UTC(),
 		}).Error
 	if err != nil {
 		return domain.Income{}, err
@@ -106,6 +107,7 @@ func fromDomain(income domain.Income) IncomeModel {
 		ID: income.ID, AmountCents: income.Money.AmountCents,
 		Currency: income.Money.Currency, SourceID: income.SourceID,
 		OccurredOn: income.OccurredOn, Note: income.Note,
+		RecurrenceID: income.RecurrenceID,
 	}
 }
 
@@ -114,7 +116,9 @@ func toDomain(model IncomeModel) (domain.Income, error) {
 	if err != nil {
 		return domain.Income{}, err
 	}
-	return domain.NewIncome(model.ID, money, model.SourceID, model.OccurredOn, model.Note)
+	return domain.NewIncome(
+		model.ID, money, model.SourceID, model.OccurredOn, model.Note, model.RecurrenceID,
+	)
 }
 
 func toDomains(models []IncomeModel) ([]domain.Income, error) {

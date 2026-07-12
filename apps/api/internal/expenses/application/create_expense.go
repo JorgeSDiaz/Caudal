@@ -29,7 +29,9 @@ func (useCase CreateExpense) Execute(ctx context.Context, command CreateExpenseC
 	if err != nil {
 		return domain.Expense{}, err
 	}
-	expense, err := domain.NewExpense(0, money, command.CategoryID, command.OccurredOn, command.Note)
+	expense, err := domain.NewExpense(
+		0, money, command.CategoryID, command.OccurredOn, command.Note, command.RecurrenceID,
+	)
 	if err != nil {
 		return domain.Expense{}, err
 	}

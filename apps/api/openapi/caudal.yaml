@@ -325,13 +325,15 @@ components:
         category_id: { type: integer, minimum: 1, nullable: true }
         occurred_on: { type: string, format: date, nullable: true }
         note: { type: string, nullable: true }
+        recurrence_id: { type: integer, minimum: 1, nullable: true }
     ExpenseResponse:
       allOf:
         - $ref: "#/components/schemas/CreateExpenseRequest"
         - type: object
-          required: [id, note]
+          required: [id, note, recurrence_id]
           properties:
             id: { type: integer }
+            recurrence_id: { type: integer, nullable: true }
     ExpensePageResponse:
       type: object
       required: [items, total]
@@ -358,13 +360,15 @@ components:
         source_id: { type: integer, minimum: 1, nullable: true }
         occurred_on: { type: string, format: date, nullable: true }
         note: { type: string, nullable: true }
+        recurrence_id: { type: integer, minimum: 1, nullable: true }
     IncomeResponse:
       allOf:
         - $ref: "#/components/schemas/CreateIncomeRequest"
         - type: object
-          required: [id, note]
+          required: [id, note, recurrence_id]
           properties:
             id: { type: integer }
+            recurrence_id: { type: integer, nullable: true }
     IncomePageResponse:
       type: object
       required: [items, total]

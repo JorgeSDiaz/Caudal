@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-	"sort"
 	"time"
 
 	shared "caudal-api/internal/shared/domain"
@@ -46,15 +45,7 @@ func NewRecurrence(item Recurrence) (Recurrence, error) {
 }
 
 func (item Recurrence) Days() []int {
-	if item.SecondDayOfMonth == nil {
-		return []int{item.DayOfMonth}
-	}
-	days := []int{item.DayOfMonth, *item.SecondDayOfMonth}
-	sort.Ints(days)
-	if days[0] == days[1] {
-		return days[:1]
-	}
-	return days
+	return []int{item.DayOfMonth}
 }
 
 func validate(item Recurrence) error {
@@ -75,13 +66,10 @@ func validate(item Recurrence) error {
 
 func validateFrequency(item Recurrence) error {
 	if item.Frequency == Biweekly {
-		if item.SecondDayOfMonth == nil {
-			return errors.New("a biweekly recurrence needs a second day")
-		}
-		if *item.SecondDayOfMonth < 1 || *item.SecondDayOfMonth > 31 {
+		if item.SecondDayOfMonth != nil && (*item.SecondDayOfMonth < 1 || *item.SecondDayOfMonth > 31) {
 			return errors.New("second_day_of_month must be between 1 and 31")
 		}
-		if *item.SecondDayOfMonth == item.DayOfMonth {
+		if item.SecondDayOfMonth != nil && *item.SecondDayOfMonth == item.DayOfMonth {
 			return errors.New("the two days of a biweekly recurrence must differ")
 		}
 	} else if item.Frequency == Monthly {

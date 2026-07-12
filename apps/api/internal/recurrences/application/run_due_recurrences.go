@@ -36,10 +36,7 @@ func (useCase RunDueRecurrences) Execute(ctx context.Context, today time.Time) (
 func (useCase RunDueRecurrences) materialize(ctx context.Context, recurrence domain.Recurrence, today time.Time) (int, error) {
 	occurrences := domain.DueOccurrences(recurrence, today)
 	for _, occurrence := range occurrences {
-		err := useCase.writer.Create(
-			ctx, recurrence.Kind, recurrence.Money.AmountCents, recurrence.Money.Currency,
-			recurrence.CategoryID, occurrence, recurrence.Note,
-		)
+		err := useCase.writer.Create(ctx, recurrence, occurrence)
 		if err != nil {
 			return 0, err
 		}

@@ -17,7 +17,9 @@ import { createIncome } from '@/features/incomes/api/create-income'
 import { updateIncome } from '@/features/incomes/api/update-income'
 import type { Income } from '@/features/incomes/income'
 import { createRecurrence } from '@/features/recurrences/api/create-recurrence'
+import { updateRecurrence } from '@/features/recurrences/api/update-recurrence'
 import { RecurrenceConfig } from '@/features/recurrences/components/recurrence-config'
+import { useRecurrences } from '@/features/recurrences/hooks/use-recurrences'
 import { defaultRecurrenceConfig } from '@/features/recurrences/recurrence-config'
 import { monthOf, todayIso } from '@/shared/dates'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/shared/money'
@@ -26,6 +28,10 @@ import { monthListMatch, recurrencesKey, reportKey } from '@/shared/swr-keys'
 /** Revalidate the month list (every loaded page) and report so the change shows up immediately. */
 function revalidateMonth(month: string): Promise<unknown> {
   return Promise.all([mutate(monthListMatch('incomes', month)), mutate(reportKey(month))])
+}
+
+function dayOfMonth(isoDate: string): number {
+  return Number(isoDate.split('-')[2])
 }
 
 export function IncomeForm({
@@ -39,16 +45,26 @@ export function IncomeForm({
 }) {
   const isEditing = income !== undefined
   const { categories, isLoading } = useCategories('income')
+  const { recurrences } = useRecurrences('income')
+  const linkedRecurrence = recurrences.find((item) => item.id === income?.recurrence_id)
   const [amount, setAmount] = useState(() => (income ? String(income.amount_cents) : ''))
   const [sourceId, setSourceId] = useState(() => (income ? String(income.source_id) : ''))
   const [occurredOn, setOccurredOn] = useState(() => income?.occurred_on ?? todayIso())
   const [note, setNote] = useState(() => income?.note ?? '')
-  const [recurrence, setRecurrence] = useState(defaultRecurrenceConfig)
+  const [recurrenceDraft, setRecurrenceDraft] = useState<typeof defaultRecurrenceConfig | null>(null)
+  const recurrence = recurrenceDraft ?? {
+    ...defaultRecurrenceConfig,
+    recurring: income?.recurrence_id !== null && income?.recurrence_id !== undefined,
+    frequency: linkedRecurrence?.frequency ?? defaultRecurrenceConfig.frequency,
+    endDate: linkedRecurrence?.end_date ?? defaultRecurrenceConfig.endDate,
+  }
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Derived during render — no effects (rerender-derived-state-no-effect).
   const amountMinor = parseAmountToMinorUnits(amount)
   const canSubmit = amountMinor !== null && sourceId !== '' && !isSubmitting
+  const isLinkedToRecurrence = income?.recurrence_id !== null && income?.recurrence_id !== undefined
+  const willCreateRecurrence = isEditing && recurrence.recurring && !isLinkedToRecurrence
   // Show the amount formatted ($ and thousands separators) inside the field itself.
   const amountDisplay = amount === '' ? '' : formatMinorUnits(Number(amount))
 
@@ -60,18 +76,54 @@ export function IncomeForm({
     try {
       const trimmedNote = note.trim() === '' ? null : note.trim()
       if (isEditing) {
+        let recurrenceId = income.recurrence_id
+        if (recurrence.recurring && recurrenceId === null) {
+          const created = await createRecurrence({
+            kind: 'income',
+            amount_cents: amountMinor,
+            currency: 'COP',
+            category_id: Number(sourceId),
+            frequency: recurrence.frequency,
+            day_of_month: dayOfMonth(occurredOn),
+            second_day_of_month: null,
+            start_date: occurredOn,
+            end_date: recurrence.endDate === '' ? null : recurrence.endDate,
+            note: trimmedNote,
+          })
+          recurrenceId = created.id
+          await mutate(recurrencesKey('income'))
+        } else if (recurrence.recurring && recurrenceId !== null) {
+          await updateRecurrence(recurrenceId, {
+            amount_cents: amountMinor,
+            currency: 'COP',
+            category_id: Number(sourceId),
+            frequency: recurrence.frequency,
+            day_of_month: dayOfMonth(occurredOn),
+            second_day_of_month: null,
+            start_date: occurredOn,
+            end_date: recurrence.endDate === '' ? null : recurrence.endDate,
+            note: trimmedNote,
+            is_active: true,
+          })
+          await mutate(recurrencesKey('income'))
+        }
         await updateIncome(income.id, {
           amount_cents: amountMinor,
           source_id: Number(sourceId),
           occurred_on: occurredOn,
           note: trimmedNote,
+          recurrence_id: recurrence.recurring ? recurrenceId : null,
         })
         // The edit may move the income to another month — refresh both.
         await Promise.all([
           revalidateMonth(monthOf(income.occurred_on)),
           revalidateMonth(monthOf(occurredOn)),
         ])
-        toast.success('Ingreso actualizado')
+        toast.success(
+          recurrence.recurring && income.recurrence_id === null
+            ? 'Ingreso actualizado y recurrencia creada'
+            : 'Ingreso actualizado',
+        )
         onSaved?.()
       } else if (recurrence.recurring) {
         await createRecurrence({
@@ -80,9 +132,8 @@ export function IncomeForm({
           currency: 'COP',
           category_id: Number(sourceId),
           frequency: recurrence.frequency,
-          day_of_month: recurrence.dayOfMonth,
-          second_day_of_month:
-            recurrence.frequency === 'biweekly' ? recurrence.secondDayOfMonth : null,
+          day_of_month: dayOfMonth(occurredOn),
+          second_day_of_month: null,
           start_date: occurredOn,
           end_date: recurrence.endDate === '' ? null : recurrence.endDate,
           note: trimmedNote,
@@ -91,7 +142,7 @@ export function IncomeForm({
         toast.success('Recurrencia creada')
         setAmount('')
         setNote('')
-        setRecurrence(defaultRecurrenceConfig)
+        setRecurrenceDraft(defaultRecurrenceConfig)
       } else {
         await createIncome({
           amount_cents: amountMinor,
@@ -108,7 +159,9 @@ export function IncomeForm({
       }
     } catch {
       const action = isEditing
-        ? 'actualizar el ingreso'
+        ? willCreateRecurrence
+          ? 'actualizar el ingreso y crear la recurrencia'
+          : 'actualizar el ingreso'
         : recurrence.recurring
           ? 'crear la recurrencia'
           : 'registrar el ingreso'
@@ -171,15 +224,17 @@ export function IncomeForm({
         />
       </div>
 
-      {!isEditing && <RecurrenceConfig value={recurrence} onChange={setRecurrence} />}
+      <RecurrenceConfig value={recurrence} onChange={setRecurrenceDraft} />
 
       <Button type="submit" size="lg" className="w-full" disabled={!canSubmit}>
         {isSubmitting
           ? 'Guardando…'
-          : isEditing
-            ? 'Guardar cambios'
-            : recurrence.recurring
+          : willCreateRecurrence
+            ? 'Guardar y crear recurrencia'
+            : recurrence.recurring && !isEditing
               ? 'Crear recurrencia'
+            : isEditing
+              ? 'Guardar cambios'
               : 'Registrar ingreso'}
       </Button>
     </form>
