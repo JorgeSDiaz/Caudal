@@ -46,7 +46,7 @@ export function IncomeForm({
   const [recurrenceDraft, setRecurrenceDraft] = useState<typeof defaultRecurrenceConfig | null>(null)
   const recurrence = recurrenceDraft ?? {
     ...defaultRecurrenceConfig,
-    recurring: income?.recurrence_id !== null && income?.recurrence_id !== undefined,
+    recurring: linkedRecurrence !== undefined,
     frequency: linkedRecurrence?.frequency ?? defaultRecurrenceConfig.frequency,
     endDate: linkedRecurrence?.end_date ?? defaultRecurrenceConfig.endDate,
   }
@@ -55,7 +55,8 @@ export function IncomeForm({
   // Derived during render — no effects (rerender-derived-state-no-effect).
   const amountMinor = parseAmountToMinorUnits(amount)
   const canSubmit = amountMinor !== null && sourceId !== '' && !isSubmitting
-  const isLinkedToRecurrence = income?.recurrence_id !== null && income?.recurrence_id !== undefined
+  // income.recurrence_id may point at a deleted recurrence — only an active one counts as linked.
+  const isLinkedToRecurrence = linkedRecurrence !== undefined
   const willCreateRecurrence = isEditing && recurrence.recurring && !isLinkedToRecurrence
   // Show the amount formatted ($ and thousands separators) inside the field itself.
   const amountDisplay = amount === '' ? '' : formatMinorUnits(Number(amount))
@@ -68,7 +69,7 @@ export function IncomeForm({
     try {
       const trimmedNote = note.trim() === '' ? null : note.trim()
       if (isEditing) {
-        let recurrenceId = income.recurrence_id
+        let recurrenceId = linkedRecurrence?.id ?? null
         if (recurrence.recurring && recurrenceId === null) {
           const created = await createRecurrence({
             kind: 'income',
@@ -112,9 +113,7 @@ export function IncomeForm({
           revalidateMonth(monthOf(occurredOn)),
         ])
         toast.success(
-          recurrence.recurring && income.recurrence_id === null
-            ? 'Ingreso actualizado y recurrencia creada'
-            : 'Ingreso actualizado',
+          willCreateRecurrence ? 'Ingreso actualizado y recurrencia creada' : 'Ingreso actualizado',
         )
         onSaved?.()
       } else if (recurrence.recurring) {

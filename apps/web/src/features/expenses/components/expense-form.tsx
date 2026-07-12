@@ -48,7 +48,7 @@ export function ExpenseForm({
   const [recurrenceDraft, setRecurrenceDraft] = useState<typeof defaultRecurrenceConfig | null>(null)
   const recurrence = recurrenceDraft ?? {
     ...defaultRecurrenceConfig,
-    recurring: expense?.recurrence_id !== null && expense?.recurrence_id !== undefined,
+    recurring: linkedRecurrence !== undefined,
     frequency: linkedRecurrence?.frequency ?? defaultRecurrenceConfig.frequency,
     endDate: linkedRecurrence?.end_date ?? defaultRecurrenceConfig.endDate,
   }
@@ -57,7 +57,8 @@ export function ExpenseForm({
   // Derived during render — no effects (rerender-derived-state-no-effect).
   const amountMinor = parseAmountToMinorUnits(amount)
   const canSubmit = amountMinor !== null && categoryId !== '' && !isSubmitting
-  const isLinkedToRecurrence = expense?.recurrence_id !== null && expense?.recurrence_id !== undefined
+  // expense.recurrence_id may point at a deleted recurrence — only an active one counts as linked.
+  const isLinkedToRecurrence = linkedRecurrence !== undefined
   const willCreateRecurrence = isEditing && recurrence.recurring && !isLinkedToRecurrence
   // Show the amount formatted ($ and thousands separators) inside the field itself.
   const amountDisplay = amount === '' ? '' : formatMinorUnits(Number(amount))
@@ -70,7 +71,7 @@ export function ExpenseForm({
     try {
       const trimmedNote = note.trim() === '' ? null : note.trim()
       if (isEditing) {
-        let recurrenceId = expense.recurrence_id
+        let recurrenceId = linkedRecurrence?.id ?? null
         if (recurrence.recurring && recurrenceId === null) {
           const created = await createRecurrence({
             kind: 'expense',
@@ -114,9 +115,7 @@ export function ExpenseForm({
           revalidateMonth(monthOf(occurredOn)),
         ])
         toast.success(
-          recurrence.recurring && expense.recurrence_id === null
-            ? 'Gasto actualizado y recurrencia creada'
-            : 'Gasto actualizado',
+          willCreateRecurrence ? 'Gasto actualizado y recurrencia creada' : 'Gasto actualizado',
         )
         onSaved?.()
       } else if (recurrence.recurring) {
