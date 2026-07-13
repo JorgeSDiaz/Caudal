@@ -5,6 +5,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ReceiptText,
+  UserRound,
   WalletCards,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -30,6 +31,7 @@ const navItems = [
   { to: '/ingresos', label: 'Ingresos', end: false, icon: WalletCards },
   { to: '/calendario', label: 'Calendario', end: false, icon: CalendarDays },
   { to: '/categorias', label: 'Categorías', end: false, icon: Tags },
+  { to: '/perfil', label: 'Perfil', end: false, icon: UserRound },
 ]
 
 export function AppLayout() {
@@ -38,7 +40,7 @@ export function AppLayout() {
   useRunDueRecurrences()
 
   return (
-    <div className="bg-muted/40 min-h-svh">
+    <div className="bg-muted/40 min-h-svh overflow-x-hidden">
       <aside
         className={cn(
           'bg-background fixed inset-y-0 left-0 z-30 hidden border-r transition-[width] duration-200 md:flex md:flex-col',

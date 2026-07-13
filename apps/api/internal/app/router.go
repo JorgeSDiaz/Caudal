@@ -18,6 +18,9 @@ import (
 	"caudal-api/internal/platform/clock"
 	"caudal-api/internal/platform/config"
 	"caudal-api/internal/platform/httpx"
+	profilehttp "caudal-api/internal/profile/adapters/http"
+	profiledb "caudal-api/internal/profile/adapters/persistence"
+	profileapp "caudal-api/internal/profile/application"
 	recurrencehttp "caudal-api/internal/recurrences/adapters/http"
 	recurrencedb "caudal-api/internal/recurrences/adapters/persistence"
 	recurrenceapp "caudal-api/internal/recurrences/application"
@@ -41,9 +44,15 @@ func NewRouter(db *gorm.DB, settings config.Settings, logger *slog.Logger) http.
 	incomeSet.router.Register(mux)
 	wireReports(db).Register(mux)
 	wireRecurrences(db).Register(mux)
+	wireProfile(db).Register(mux)
 	wireBackup(expenseSet, incomeSet).Register(mux)
 
 	return httpx.CORS(settings.CORSOrigins, httpx.LogRequests(logger, mux))
+}
+
+func wireProfile(db *gorm.DB) profilehttp.Router {
+	repository := profiledb.NewRepository(db)
+	return profilehttp.NewRouter(profileapp.NewGetProfile(repository), profileapp.NewUpdateProfile(repository))
 }
 
 func serveOpenAPI(w http.ResponseWriter, _ *http.Request) {

@@ -20,6 +20,8 @@ export function categoriesKey(kind: 'expense' | 'income', includeInactive = fals
   return ['categories', kind, includeInactive] as const
 }
 
+export const profileKey = ['profile'] as const
+
 export function categoriesMatch(kind?: 'expense' | 'income') {
   return (key: unknown): boolean =>
     Array.isArray(key) && key[0] === 'categories' && (kind === undefined || key[1] === kind)

@@ -196,10 +196,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_profile_api_v1_profile_get"];
+        put: operations["update_profile_api_v1_profile_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ProfileGoal: {
+            name: string;
+            target_amount?: number | null;
+            /** @example 2027-06 */
+            target_date?: string | null;
+        };
+        UpdateProfileRequest: {
+            alias?: string | null;
+            birth_year?: number | null;
+            city?: string | null;
+            /** @example CO */
+            country_code?: string | null;
+            estimated_monthly_income?: number | null;
+            estimated_monthly_expenses?: number | null;
+            /** @enum {string|null} */
+            income_type?: "fixed" | "variable" | "mixed" | null;
+            dependents_count?: number | null;
+            /** @enum {string|null} */
+            housing?: "rent" | "owned" | "family" | null;
+            /** @enum {string|null} */
+            risk_tolerance?: "low" | "medium" | "high" | null;
+            concerns?: string[] | null;
+            goals?: components["schemas"]["ProfileGoal"][] | null;
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        ProfileResponse: {
+            alias: string | null;
+            birth_year: number | null;
+            city: string | null;
+            country_code: string | null;
+            estimated_monthly_income: number | null;
+            estimated_monthly_expenses: number | null;
+            /** @enum {string|null} */
+            income_type: "fixed" | "variable" | "mixed" | null;
+            dependents_count: number | null;
+            /** @enum {string|null} */
+            housing: "rent" | "owned" | "family" | null;
+            /** @enum {string|null} */
+            risk_tolerance: "low" | "medium" | "high" | null;
+            concerns: string[];
+            goals: components["schemas"]["ProfileGoal"][];
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
         CategoryResponse: {
             id: number;
             name: string;
@@ -822,6 +889,50 @@ export interface operations {
                     "application/json": {
                         [key: string]: number;
                     };
+                };
+            };
+        };
+    };
+    get_profile_api_v1_profile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileResponse"];
+                };
+            };
+        };
+    };
+    update_profile_api_v1_profile_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileResponse"];
                 };
             };
         };

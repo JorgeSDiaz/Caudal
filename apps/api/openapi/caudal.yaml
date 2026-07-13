@@ -239,6 +239,31 @@ paths:
               schema:
                 additionalProperties:
                   type: integer
+  /api/v1/profile:
+    get:
+      operationId: get_profile_api_v1_profile_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+    put:
+      operationId: update_profile_api_v1_profile_put
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
 components:
   parameters:
     Month:
@@ -350,6 +375,73 @@ components:
           schema:
             $ref: "#/components/schemas/BackupDocument"
   schemas:
+    ProfileGoal:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+        target_amount: { type: integer, minimum: 0, nullable: true }
+        target_date:
+          type: string
+          pattern: "^\\d{4}-(0[1-9]|1[0-2])$"
+          example: "2027-06"
+          nullable: true
+    UpdateProfileRequest:
+      type: object
+      properties:
+        alias: { type: string, nullable: true }
+        birth_year: { type: integer, minimum: 1900, maximum: 2100, nullable: true }
+        city: { type: string, nullable: true }
+        country_code:
+          type: string
+          pattern: "^[A-Z]{2}$"
+          example: "CO"
+          nullable: true
+        estimated_monthly_income: { type: integer, minimum: 0, nullable: true }
+        estimated_monthly_expenses: { type: integer, minimum: 0, nullable: true }
+        income_type: { type: string, enum: [fixed, variable, mixed], nullable: true }
+        dependents_count: { type: integer, minimum: 0, nullable: true }
+        housing: { type: string, enum: [rent, owned, family], nullable: true }
+        risk_tolerance: { type: string, enum: [low, medium, high], nullable: true }
+        concerns:
+          type: array
+          nullable: true
+          items: { type: string }
+        goals:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/ProfileGoal"
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+    ProfileResponse:
+      type: object
+      required: [alias, birth_year, city, country_code, estimated_monthly_income, estimated_monthly_expenses, income_type, dependents_count, housing, risk_tolerance, concerns, goals, metadata, created_at, updated_at]
+      properties:
+        alias: { type: string, nullable: true }
+        birth_year: { type: integer, nullable: true }
+        city: { type: string, nullable: true }
+        country_code: { type: string, pattern: "^[A-Z]{2}$", nullable: true }
+        estimated_monthly_income: { type: integer, nullable: true }
+        estimated_monthly_expenses: { type: integer, nullable: true }
+        income_type: { type: string, enum: [fixed, variable, mixed], nullable: true }
+        dependents_count: { type: integer, nullable: true }
+        housing: { type: string, enum: [rent, owned, family], nullable: true }
+        risk_tolerance: { type: string, enum: [low, medium, high], nullable: true }
+        concerns:
+          type: array
+          items: { type: string }
+        goals:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileGoal"
+        metadata:
+          type: object
+          additionalProperties: true
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
     CategoryResponse:
       type: object
       required: [id, name, icon, sort_order, kind, is_system, is_active]
