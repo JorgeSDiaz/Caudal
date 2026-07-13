@@ -2,7 +2,6 @@ import { Suspense, lazy } from 'react'
 
 import { ExpenseForm } from '@/features/expenses/components/expense-form'
 import { ExpenseList } from '@/features/expenses/components/expense-list'
-import { RecurrenceList } from '@/features/recurrences/components/recurrence-list'
 import { MonthSummary } from '@/features/reports/components/month-summary'
 import {
   BentoCard,
@@ -31,15 +30,6 @@ export function ExpensesPage() {
           </BentoCardHeader>
           <BentoCardContent>
             <ExpenseForm />
-          </BentoCardContent>
-        </BentoCard>
-
-        <BentoCard>
-          <BentoCardHeader>
-            <BentoCardTitle>Recurrentes</BentoCardTitle>
-          </BentoCardHeader>
-          <BentoCardContent>
-            <RecurrenceList kind="expense" />
           </BentoCardContent>
         </BentoCard>
       </div>

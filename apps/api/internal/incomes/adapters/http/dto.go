@@ -18,13 +18,12 @@ type IncomeRequest struct {
 }
 
 type IncomeResponse struct {
-	ID           int64   `json:"id"`
-	AmountCents  int64   `json:"amount_cents"`
-	Currency     string  `json:"currency"`
-	SourceID     int64   `json:"source_id"`
-	OccurredOn   string  `json:"occurred_on"`
-	Note         *string `json:"note"`
-	RecurrenceID *int64  `json:"recurrence_id"`
+	ID          int64   `json:"id"`
+	AmountCents int64   `json:"amount_cents"`
+	Currency    string  `json:"currency"`
+	SourceID    int64   `json:"source_id"`
+	OccurredOn  string  `json:"occurred_on"`
+	Note        *string `json:"note"`
 }
 
 type IncomePageResponse struct {
@@ -48,7 +47,6 @@ func incomeResponse(income domain.Income) IncomeResponse {
 		ID: income.ID, AmountCents: income.Money.AmountCents,
 		Currency: income.Money.Currency, SourceID: income.SourceID,
 		OccurredOn: httpx.FormatDate(income.OccurredOn), Note: income.Note,
-		RecurrenceID: income.RecurrenceID,
 	}
 }
 
@@ -77,7 +75,7 @@ func patchIncomeCommand(id int64, raw map[string]json.RawMessage) (application.U
 	if err := setNullableString(raw, "note", &command.Note); err != nil {
 		return command, err
 	}
-	return command, setNullableInt64(raw, "recurrence_id", &command.RecurrenceID)
+	return command, nil
 }
 
 func setDate(raw map[string]json.RawMessage, key string, target **time.Time) error {

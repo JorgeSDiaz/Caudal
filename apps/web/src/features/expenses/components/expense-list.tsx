@@ -128,7 +128,7 @@ function ExpenseRow({
               <DialogHeader>
                 <DialogTitle>Editar gasto</DialogTitle>
                 <DialogDescription>
-                  Ajusta monto, categoría, fecha, nota o crea una recurrencia.
+                  Ajusta monto, categoría, fecha o nota.
                 </DialogDescription>
               </DialogHeader>
               <ExpenseForm expense={expense} onSaved={() => setIsEditing(false)} />

@@ -59,8 +59,5 @@ func (useCase UpdateIncome) applyChanges(ctx context.Context, income *domain.Inc
 	if command.Note != nil {
 		income.Note = *command.Note
 	}
-	if command.RecurrenceID != nil {
-		income.RecurrenceID = *command.RecurrenceID
-	}
 	return nil
 }

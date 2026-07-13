@@ -62,13 +62,12 @@ func (repo Repository) Update(ctx context.Context, expense domain.Expense) (doma
 	err := repo.db.WithContext(ctx).Model(&ExpenseModel{}).
 		Where("id = ? AND deleted_at IS NULL", expense.ID).
 		Updates(map[string]any{
-			"amount_cents":  expense.Money.AmountCents,
-			"currency":      expense.Money.Currency,
-			"category_id":   expense.CategoryID,
-			"occurred_on":   expense.OccurredOn,
-			"note":          expense.Note,
-			"recurrence_id": expense.RecurrenceID,
-			"updated_at":    time.Now().UTC(),
+			"amount_cents": expense.Money.AmountCents,
+			"currency":     expense.Money.Currency,
+			"category_id":  expense.CategoryID,
+			"occurred_on":  expense.OccurredOn,
+			"note":         expense.Note,
+			"updated_at":   time.Now().UTC(),
 		}).Error
 	if err != nil {
 		return domain.Expense{}, err
@@ -108,7 +107,6 @@ func fromDomain(expense domain.Expense) ExpenseModel {
 		ID: expense.ID, AmountCents: expense.Money.AmountCents,
 		Currency: expense.Money.Currency, CategoryID: expense.CategoryID,
 		OccurredOn: expense.OccurredOn, Note: expense.Note,
-		RecurrenceID: expense.RecurrenceID,
 	}
 }
 
@@ -118,7 +116,7 @@ func toDomain(model ExpenseModel) (domain.Expense, error) {
 		return domain.Expense{}, err
 	}
 	return domain.NewExpense(
-		model.ID, money, model.CategoryID, model.OccurredOn, model.Note, model.RecurrenceID,
+		model.ID, money, model.CategoryID, model.OccurredOn, model.Note,
 	)
 }
 

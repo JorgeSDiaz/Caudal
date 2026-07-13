@@ -142,82 +142,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MonthlyReportResponse"
-  /api/v1/recurrences:
-    get:
-      operationId: list_recurrences_api_v1_recurrences_get
-      parameters:
-        - name: kind
-          in: query
-          schema:
-            type: string
-            enum: [expense, income]
-            nullable: true
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/RecurrenceResponse"
-    post:
-      operationId: create_recurrence_api_v1_recurrences_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateRecurrenceRequest"
-      responses:
-        "201":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RecurrenceResponse"
-  /api/v1/recurrences/{recurrence_id}:
-    patch:
-      operationId: update_recurrence_api_v1_recurrences__recurrence_id__patch
-      parameters:
-        - name: recurrence_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateRecurrenceRequest"
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RecurrenceResponse"
-    delete:
-      operationId: delete_recurrence_api_v1_recurrences__recurrence_id__delete
-      parameters:
-        - name: recurrence_id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "204":
-          description: Successful Response
-  /api/v1/recurrences/run:
-    post:
-      operationId: run_recurrences_api_v1_recurrences_run_post
-      responses:
-        "200":
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: integer
   /api/v1/backup:
     get:
       operationId: export_backup_api_v1_backup_get
@@ -483,15 +407,13 @@ components:
         category_id: { type: integer, minimum: 1, nullable: true }
         occurred_on: { type: string, format: date, nullable: true }
         note: { type: string, nullable: true }
-        recurrence_id: { type: integer, minimum: 1, nullable: true }
     ExpenseResponse:
       allOf:
         - $ref: "#/components/schemas/CreateExpenseRequest"
         - type: object
-          required: [id, note, recurrence_id]
+          required: [id, note]
           properties:
             id: { type: integer }
-            recurrence_id: { type: integer, nullable: true }
     ExpensePageResponse:
       type: object
       required: [items, total]
@@ -518,15 +440,13 @@ components:
         source_id: { type: integer, minimum: 1, nullable: true }
         occurred_on: { type: string, format: date, nullable: true }
         note: { type: string, nullable: true }
-        recurrence_id: { type: integer, minimum: 1, nullable: true }
     IncomeResponse:
       allOf:
         - $ref: "#/components/schemas/CreateIncomeRequest"
         - type: object
-          required: [id, note, recurrence_id]
+          required: [id, note]
           properties:
             id: { type: integer }
-            recurrence_id: { type: integer, nullable: true }
     IncomePageResponse:
       type: object
       required: [items, total]
@@ -580,42 +500,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SourceBreakdownResponse"
-    CreateRecurrenceRequest:
-      type: object
-      required: [kind, amount_cents, currency, category_id, frequency, day_of_month, start_date]
-      properties:
-        kind: { type: string, enum: [expense, income] }
-        amount_cents: { type: integer, minimum: 1 }
-        currency: { type: string, minLength: 3, maxLength: 3 }
-        category_id: { type: integer, minimum: 1 }
-        frequency: { type: string, enum: [monthly, biweekly] }
-        day_of_month: { type: integer, minimum: 1, maximum: 31 }
-        second_day_of_month: { type: integer, minimum: 1, maximum: 31, nullable: true }
-        start_date: { type: string, format: date }
-        end_date: { type: string, format: date, nullable: true }
-        note: { type: string, nullable: true }
-    UpdateRecurrenceRequest:
-      type: object
-      properties:
-        amount_cents: { type: integer, minimum: 1, nullable: true }
-        currency: { type: string, minLength: 3, maxLength: 3, nullable: true }
-        category_id: { type: integer, minimum: 1, nullable: true }
-        frequency: { type: string, enum: [monthly, biweekly], nullable: true }
-        day_of_month: { type: integer, minimum: 1, maximum: 31, nullable: true }
-        second_day_of_month: { type: integer, minimum: 1, maximum: 31, nullable: true }
-        start_date: { type: string, format: date, nullable: true }
-        end_date: { type: string, format: date, nullable: true }
-        note: { type: string, nullable: true }
-        is_active: { type: boolean, nullable: true }
-    RecurrenceResponse:
-      allOf:
-        - $ref: "#/components/schemas/CreateRecurrenceRequest"
-        - type: object
-          required: [id, second_day_of_month, end_date, note, is_active, next_occurrence_on]
-          properties:
-            id: { type: integer }
-            is_active: { type: boolean }
-            next_occurrence_on: { type: string, format: date, nullable: true }
     BackupDocument:
       type: object
       required: [expenses]

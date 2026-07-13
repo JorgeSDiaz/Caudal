@@ -12,10 +12,6 @@ export function reportKey(month: string) {
   return ['report', month] as const
 }
 
-export function recurrencesKey(kind: 'expense' | 'income') {
-  return ['recurrences', kind] as const
-}
-
 export function categoriesKey(kind: 'expense' | 'income', includeInactive = false) {
   return ['categories', kind, includeInactive] as const
 }

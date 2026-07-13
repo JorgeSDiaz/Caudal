@@ -130,7 +130,7 @@ function IncomeRow({
               <DialogHeader>
                 <DialogTitle>Editar ingreso</DialogTitle>
                 <DialogDescription>
-                  Ajusta monto, fuente, fecha, nota o crea una recurrencia.
+                  Ajusta monto, fuente, fecha o nota.
                 </DialogDescription>
               </DialogHeader>
               <IncomeForm income={income} onSaved={() => setIsEditing(false)} />

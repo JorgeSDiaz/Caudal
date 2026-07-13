@@ -132,54 +132,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/recurrences": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["list_recurrences_api_v1_recurrences_get"];
-        put?: never;
-        post: operations["create_recurrence_api_v1_recurrences_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/recurrences/{recurrence_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["delete_recurrence_api_v1_recurrences__recurrence_id__delete"];
-        options?: never;
-        head?: never;
-        patch: operations["update_recurrence_api_v1_recurrences__recurrence_id__patch"];
-        trace?: never;
-    };
-    "/api/v1/recurrences/run": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["run_recurrences_api_v1_recurrences_run_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/backup": {
         parameters: {
             query?: never;
@@ -303,11 +255,9 @@ export interface components {
             /** Format: date */
             occurred_on?: string | null;
             note?: string | null;
-            recurrence_id?: number | null;
         };
         ExpenseResponse: components["schemas"]["CreateExpenseRequest"] & {
             id: number;
-            recurrence_id: number | null;
         };
         ExpensePageResponse: {
             items: components["schemas"]["ExpenseResponse"][];
@@ -328,11 +278,9 @@ export interface components {
             /** Format: date */
             occurred_on?: string | null;
             note?: string | null;
-            recurrence_id?: number | null;
         };
         IncomeResponse: components["schemas"]["CreateIncomeRequest"] & {
             id: number;
-            recurrence_id: number | null;
         };
         IncomePageResponse: {
             items: components["schemas"]["IncomeResponse"][];
@@ -360,43 +308,6 @@ export interface components {
             net_cents: number;
             by_category: components["schemas"]["CategoryBreakdownResponse"][];
             by_source: components["schemas"]["SourceBreakdownResponse"][];
-        };
-        CreateRecurrenceRequest: {
-            /** @enum {string} */
-            kind: "expense" | "income";
-            amount_cents: number;
-            currency: string;
-            category_id: number;
-            /** @enum {string} */
-            frequency: "monthly" | "biweekly";
-            day_of_month: number;
-            second_day_of_month?: number | null;
-            /** Format: date */
-            start_date: string;
-            /** Format: date */
-            end_date?: string | null;
-            note?: string | null;
-        };
-        UpdateRecurrenceRequest: {
-            amount_cents?: number | null;
-            currency?: string | null;
-            category_id?: number | null;
-            /** @enum {string|null} */
-            frequency?: "monthly" | "biweekly" | null;
-            day_of_month?: number | null;
-            second_day_of_month?: number | null;
-            /** Format: date */
-            start_date?: string | null;
-            /** Format: date */
-            end_date?: string | null;
-            note?: string | null;
-            is_active?: boolean | null;
-        };
-        RecurrenceResponse: components["schemas"]["CreateRecurrenceRequest"] & {
-            id: number;
-            is_active: boolean;
-            /** Format: date */
-            next_occurrence_on: string | null;
         };
         BackupDocument: {
             expenses: components["schemas"]["CreateExpenseRequest"][];
@@ -737,120 +648,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MonthlyReportResponse"];
-                };
-            };
-        };
-    };
-    list_recurrences_api_v1_recurrences_get: {
-        parameters: {
-            query?: {
-                kind?: "expense" | "income" | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecurrenceResponse"][];
-                };
-            };
-        };
-    };
-    create_recurrence_api_v1_recurrences_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["CreateRecurrenceRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecurrenceResponse"];
-                };
-            };
-        };
-    };
-    delete_recurrence_api_v1_recurrences__recurrence_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                recurrence_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    update_recurrence_api_v1_recurrences__recurrence_id__patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                recurrence_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["UpdateRecurrenceRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecurrenceResponse"];
-                };
-            };
-        };
-    };
-    run_recurrences_api_v1_recurrences_run_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: number;
-                    };
                 };
             };
         };

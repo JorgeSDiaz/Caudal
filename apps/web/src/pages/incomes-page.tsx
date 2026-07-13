@@ -2,7 +2,6 @@ import { Suspense, lazy } from 'react'
 
 import { IncomeForm } from '@/features/incomes/components/income-form'
 import { IncomeList } from '@/features/incomes/components/income-list'
-import { RecurrenceList } from '@/features/recurrences/components/recurrence-list'
 import { IncomeSummary } from '@/features/reports/components/income-summary'
 import {
   BentoCard,
@@ -31,15 +30,6 @@ export function IncomesPage() {
           </BentoCardHeader>
           <BentoCardContent>
             <IncomeForm />
-          </BentoCardContent>
-        </BentoCard>
-
-        <BentoCard>
-          <BentoCardHeader>
-            <BentoCardTitle>Recurrentes</BentoCardTitle>
-          </BentoCardHeader>
-          <BentoCardContent>
-            <RecurrenceList kind="income" />
           </BentoCardContent>
         </BentoCard>
       </div>

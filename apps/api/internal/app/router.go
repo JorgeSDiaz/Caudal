@@ -15,15 +15,11 @@ import (
 	incomehttp "caudal-api/internal/incomes/adapters/http"
 	incomedb "caudal-api/internal/incomes/adapters/persistence"
 	incomeapp "caudal-api/internal/incomes/application"
-	"caudal-api/internal/platform/clock"
 	"caudal-api/internal/platform/config"
 	"caudal-api/internal/platform/httpx"
 	profilehttp "caudal-api/internal/profile/adapters/http"
 	profiledb "caudal-api/internal/profile/adapters/persistence"
 	profileapp "caudal-api/internal/profile/application"
-	recurrencehttp "caudal-api/internal/recurrences/adapters/http"
-	recurrencedb "caudal-api/internal/recurrences/adapters/persistence"
-	recurrenceapp "caudal-api/internal/recurrences/application"
 	reporthttp "caudal-api/internal/reports/adapters/http"
 	reportdb "caudal-api/internal/reports/adapters/persistence"
 	reportapp "caudal-api/internal/reports/application"
@@ -43,7 +39,6 @@ func NewRouter(db *gorm.DB, settings config.Settings, logger *slog.Logger) http.
 	incomeSet := wireIncomes(db)
 	incomeSet.router.Register(mux)
 	wireReports(db).Register(mux)
-	wireRecurrences(db).Register(mux)
 	wireProfile(db).Register(mux)
 	wireBackup(expenseSet, incomeSet).Register(mux)
 
@@ -121,20 +116,6 @@ func wireIncomes(db *gorm.DB) incomeWiring {
 func wireReports(db *gorm.DB) reporthttp.Router {
 	monthly := reportapp.NewMonthlyReport(reportdb.NewExpenseReader(db), reportdb.NewIncomeReader(db))
 	return reporthttp.NewRouter(monthly)
-}
-
-func wireRecurrences(db *gorm.DB) recurrencehttp.Router {
-	repository := recurrencedb.NewRepository(db)
-	checker := recurrencedb.NewCategoryChecker(db)
-	writer := recurrencedb.NewMovementWriter(db)
-	create := recurrenceapp.NewCreateRecurrence(repository, checker)
-	return recurrencehttp.NewRouter(
-		create, recurrenceapp.NewListRecurrences(repository),
-		recurrenceapp.NewUpdateRecurrence(repository, checker),
-		recurrenceapp.NewDeleteRecurrence(repository),
-		recurrenceapp.NewRunDueRecurrences(repository, writer),
-		clock.SystemClock{},
-	)
 }
 
 func wireBackup(expenses expenseWiring, incomes incomeWiring) backuphttp.Router {

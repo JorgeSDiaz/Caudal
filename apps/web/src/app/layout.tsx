@@ -1,5 +1,4 @@
 import {
-  CalendarDays,
   Home,
   Tags,
   PanelLeftClose,
@@ -14,7 +13,6 @@ import { NavLink, Outlet } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { BackupControls } from '@/features/backup/components/backup-controls'
-import { useRunDueRecurrences } from '@/features/recurrences/hooks/use-run-due-recurrences'
 import { cn } from '@/lib/utils'
 import { currentMonth } from '@/shared/dates'
 
@@ -29,7 +27,6 @@ const navItems = [
   { to: '/', label: 'Inicio', end: true, icon: Home },
   { to: '/gastos', label: 'Gastos', end: false, icon: ReceiptText },
   { to: '/ingresos', label: 'Ingresos', end: false, icon: WalletCards },
-  { to: '/calendario', label: 'Calendario', end: false, icon: CalendarDays },
   { to: '/categorias', label: 'Categorías', end: false, icon: Tags },
   { to: '/perfil', label: 'Perfil', end: false, icon: UserRound },
 ]
@@ -37,7 +34,6 @@ const navItems = [
 export function AppLayout() {
   const month = currentMonth()
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
-  useRunDueRecurrences()
 
   return (
     <div className="bg-muted/40 min-h-svh overflow-x-hidden">

@@ -18,13 +18,12 @@ type ExpenseRequest struct {
 }
 
 type ExpenseResponse struct {
-	ID           int64   `json:"id"`
-	AmountCents  int64   `json:"amount_cents"`
-	Currency     string  `json:"currency"`
-	CategoryID   int64   `json:"category_id"`
-	OccurredOn   string  `json:"occurred_on"`
-	Note         *string `json:"note"`
-	RecurrenceID *int64  `json:"recurrence_id"`
+	ID          int64   `json:"id"`
+	AmountCents int64   `json:"amount_cents"`
+	Currency    string  `json:"currency"`
+	CategoryID  int64   `json:"category_id"`
+	OccurredOn  string  `json:"occurred_on"`
+	Note        *string `json:"note"`
 }
 
 type ExpensePageResponse struct {
@@ -48,7 +47,6 @@ func expenseResponse(expense domain.Expense) ExpenseResponse {
 		ID: expense.ID, AmountCents: expense.Money.AmountCents,
 		Currency: expense.Money.Currency, CategoryID: expense.CategoryID,
 		OccurredOn: httpx.FormatDate(expense.OccurredOn), Note: expense.Note,
-		RecurrenceID: expense.RecurrenceID,
 	}
 }
 
@@ -77,7 +75,7 @@ func patchExpenseCommand(id int64, raw map[string]json.RawMessage) (application.
 	if err := setNullableString(raw, "note", &command.Note); err != nil {
 		return command, err
 	}
-	return command, setNullableInt64(raw, "recurrence_id", &command.RecurrenceID)
+	return command, nil
 }
 
 func setDate(raw map[string]json.RawMessage, key string, target **time.Time) error {

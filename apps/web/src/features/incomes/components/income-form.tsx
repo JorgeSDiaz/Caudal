@@ -9,56 +9,23 @@ import { CategorySelect } from '@/features/categories/components/category-select
 import { createIncome } from '@/features/incomes/api/create-income'
 import { updateIncome } from '@/features/incomes/api/update-income'
 import type { Income } from '@/features/incomes/income'
-import { createRecurrence } from '@/features/recurrences/api/create-recurrence'
-import { updateRecurrence } from '@/features/recurrences/api/update-recurrence'
-import { RecurrenceConfig } from '@/features/recurrences/components/recurrence-config'
-import { useRecurrences } from '@/features/recurrences/hooks/use-recurrences'
-import { defaultRecurrenceConfig } from '@/features/recurrences/recurrence-config'
 import { monthOf, todayIso } from '@/shared/dates'
 import { formatMinorUnits, parseAmountToMinorUnits } from '@/shared/money'
-import { monthListMatch, recurrencesKey, reportKey } from '@/shared/swr-keys'
+import { monthListMatch, reportKey } from '@/shared/swr-keys'
 
-/** Revalidate the month list (every loaded page) and report so the change shows up immediately. */
 function revalidateMonth(month: string): Promise<unknown> {
   return Promise.all([mutate(monthListMatch('incomes', month)), mutate(reportKey(month))])
 }
 
-function dayOfMonth(isoDate: string): number {
-  return Number(isoDate.split('-')[2])
-}
-
-export function IncomeForm({
-  income,
-  onSaved,
-}: {
-  /** When provided the form edits this income instead of creating a new one. */
-  income?: Income
-  /** Called after a successful save (e.g. to close the edit dialog). */
-  onSaved?: () => void
-}) {
+export function IncomeForm({ income, onSaved }: { income?: Income; onSaved?: () => void }) {
   const isEditing = income !== undefined
-  const { recurrences } = useRecurrences('income')
-  const linkedRecurrence = recurrences.find((item) => item.id === income?.recurrence_id)
   const [amount, setAmount] = useState(() => (income ? String(income.amount_cents) : ''))
   const [sourceId, setSourceId] = useState(() => (income ? String(income.source_id) : ''))
   const [occurredOn, setOccurredOn] = useState(() => income?.occurred_on ?? todayIso())
   const [note, setNote] = useState(() => income?.note ?? '')
-  const [recurrenceDraft, setRecurrenceDraft] = useState<typeof defaultRecurrenceConfig | null>(null)
-  const recurrence = recurrenceDraft ?? {
-    ...defaultRecurrenceConfig,
-    recurring: linkedRecurrence !== undefined,
-    frequency: linkedRecurrence?.frequency ?? defaultRecurrenceConfig.frequency,
-    endDate: linkedRecurrence?.end_date ?? defaultRecurrenceConfig.endDate,
-  }
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // Derived during render — no effects (rerender-derived-state-no-effect).
   const amountMinor = parseAmountToMinorUnits(amount)
   const canSubmit = amountMinor !== null && sourceId !== '' && !isSubmitting
-  // income.recurrence_id may point at a deleted recurrence — only an active one counts as linked.
-  const isLinkedToRecurrence = linkedRecurrence !== undefined
-  const willCreateRecurrence = isEditing && recurrence.recurring && !isLinkedToRecurrence
-  // Show the amount formatted ($ and thousands separators) inside the field itself.
   const amountDisplay = amount === '' ? '' : formatMinorUnits(Number(amount))
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -69,71 +36,18 @@ export function IncomeForm({
     try {
       const trimmedNote = note.trim() === '' ? null : note.trim()
       if (isEditing) {
-        let recurrenceId = linkedRecurrence?.id ?? null
-        if (recurrence.recurring && recurrenceId === null) {
-          const created = await createRecurrence({
-            kind: 'income',
-            amount_cents: amountMinor,
-            currency: 'COP',
-            category_id: Number(sourceId),
-            frequency: recurrence.frequency,
-            day_of_month: dayOfMonth(occurredOn),
-            second_day_of_month: null,
-            start_date: occurredOn,
-            end_date: recurrence.endDate === '' ? null : recurrence.endDate,
-            note: trimmedNote,
-          })
-          recurrenceId = created.id
-          await mutate(recurrencesKey('income'))
-        } else if (recurrence.recurring && recurrenceId !== null) {
-          await updateRecurrence(recurrenceId, {
-            amount_cents: amountMinor,
-            currency: 'COP',
-            category_id: Number(sourceId),
-            frequency: recurrence.frequency,
-            day_of_month: dayOfMonth(occurredOn),
-            second_day_of_month: null,
-            start_date: occurredOn,
-            end_date: recurrence.endDate === '' ? null : recurrence.endDate,
-            note: trimmedNote,
-            is_active: true,
-          })
-          await mutate(recurrencesKey('income'))
-        }
         await updateIncome(income.id, {
           amount_cents: amountMinor,
           source_id: Number(sourceId),
           occurred_on: occurredOn,
           note: trimmedNote,
-          recurrence_id: recurrence.recurring ? recurrenceId : null,
         })
-        // The edit may move the income to another month — refresh both.
         await Promise.all([
           revalidateMonth(monthOf(income.occurred_on)),
           revalidateMonth(monthOf(occurredOn)),
         ])
-        toast.success(
-          willCreateRecurrence ? 'Ingreso actualizado y recurrencia creada' : 'Ingreso actualizado',
-        )
+        toast.success('Ingreso actualizado')
         onSaved?.()
-      } else if (recurrence.recurring) {
-        await createRecurrence({
-          kind: 'income',
-          amount_cents: amountMinor,
-          currency: 'COP',
-          category_id: Number(sourceId),
-          frequency: recurrence.frequency,
-          day_of_month: dayOfMonth(occurredOn),
-          second_day_of_month: null,
-          start_date: occurredOn,
-          end_date: recurrence.endDate === '' ? null : recurrence.endDate,
-          note: trimmedNote,
-        })
-        await mutate(recurrencesKey('income'))
-        toast.success('Recurrencia creada')
-        setAmount('')
-        setNote('')
-        setRecurrenceDraft(defaultRecurrenceConfig)
       } else {
         await createIncome({
           amount_cents: amountMinor,
@@ -144,19 +58,11 @@ export function IncomeForm({
         })
         await revalidateMonth(monthOf(occurredOn))
         toast.success('Ingreso registrado')
-        // Keep source and date for fast repeated entry; clear amount and note.
         setAmount('')
         setNote('')
       }
     } catch {
-      const action = isEditing
-        ? willCreateRecurrence
-          ? 'actualizar el ingreso y crear la recurrencia'
-          : 'actualizar el ingreso'
-        : recurrence.recurring
-          ? 'crear la recurrencia'
-          : 'registrar el ingreso'
-      toast.error(`No se pudo ${action}`)
+      toast.error(isEditing ? 'No se pudo actualizar el ingreso' : 'No se pudo registrar el ingreso')
     } finally {
       setIsSubmitting(false)
     }
@@ -165,9 +71,9 @@ export function IncomeForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="amount">Monto</Label>
+        <Label htmlFor="income-amount">Monto</Label>
         <Input
-          id="amount"
+          id="income-amount"
           inputMode="numeric"
           autoFocus
           placeholder="$ 0"
@@ -183,9 +89,9 @@ export function IncomeForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">{recurrence.recurring ? 'Desde' : 'Fecha'}</Label>
+        <Label htmlFor="income-date">Fecha</Label>
         <Input
-          id="date"
+          id="income-date"
           type="date"
           value={occurredOn}
           onChange={(event) => setOccurredOn(event.target.value)}
@@ -194,28 +100,18 @@ export function IncomeForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="note">Nota (opcional)</Label>
+        <Label htmlFor="income-note">Nota (opcional)</Label>
         <Input
-          id="note"
-          placeholder="Quincena de junio"
+          id="income-note"
+          placeholder="Pago de nómina"
           value={note}
           onChange={(event) => setNote(event.target.value)}
           className="h-11"
         />
       </div>
 
-      <RecurrenceConfig value={recurrence} onChange={setRecurrenceDraft} />
-
       <Button type="submit" size="lg" className="w-full" disabled={!canSubmit}>
-        {isSubmitting
-          ? 'Guardando…'
-          : willCreateRecurrence
-            ? 'Guardar y crear recurrencia'
-            : recurrence.recurring && !isEditing
-              ? 'Crear recurrencia'
-            : isEditing
-              ? 'Guardar cambios'
-              : 'Registrar ingreso'}
+        {isSubmitting ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Registrar ingreso'}
       </Button>
     </form>
   )

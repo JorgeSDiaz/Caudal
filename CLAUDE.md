@@ -29,7 +29,7 @@ When adding a web dependency, install it inside the running container (the conta
 
 ### Backend — Hexagonal + Screaming
 
-Structure screams the domain, not the framework. Every bounded context (`expenses`, `categories`, `reports`, `incomes`, `recurrences`) repeats the same internal layout:
+Structure screams the domain, not the framework. Every bounded context (`expenses`, `categories`, `reports`, `incomes`) repeats the same internal layout:
 
 ```
 <context>/
